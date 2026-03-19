@@ -1,0 +1,87 @@
+name: PHP CI with Docker
+
+on:
+  pull_request:
+    branches: [ '*' ]
+  push:
+    branches: [ '*' ]
+
+jobs:
+  static-and-unit:
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.1'
+          tools: composer
+          coverage: none
+
+      - name: Update Composer and install dependencies
+        run: |
+          composer self-update --2
+          composer validate
+          composer install
+
+      - name: Run static analysis
+        run: |
+          composer test:static
+          composer test:phpstan
+
+      - name: Run unit tests
+        run: composer test:unit
+
+  docker-integration:
+    runs-on: ubuntu-22.04
+    needs: static-and-unit
+
+    strategy:
+      fail-fast: false
+      matrix:
+        test_group: [m23, m24, m24nodb, m2451nodb]
+
+    env:
+      TEST_GROUP: ${{ matrix.test_group }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.1'
+          tools: composer
+          coverage: none
+
+      - name: Update Composer and install dependencies
+        run: |
+          composer self-update --2
+          composer validate
+          composer install
+
+      - name: Set up Docker
+        run: docker --version
+
+      - name: Start Docker containers
+        working-directory: dev
+        run: |
+          make docker-up ENV=${{ env.TEST_GROUP }}
+          docker ps
+
+      - name: Install Magento modules
+        working-directory: dev
+        run: make docker-install ENV=${{ env.TEST_GROUP }}
+
+      - name: Run integration tests
+        working-directory: dev
+        run: make docker-test ENV=${{ env.TEST_GROUP }}
+
+    services:
+      docker:
+        image: docker:20.10.16
+        options: --privileged

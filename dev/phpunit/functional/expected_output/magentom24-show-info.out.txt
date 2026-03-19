@@ -94,6 +94,8 @@
 | INFO  | DB schema added          | vendor/magento/module-store-data-exporter/etc/db_schema.xml                                                                        | stores_data_exporter                                                                                                               |
 | INFO  | DB schema added          | vendor/magento/module-two-factor-auth/etc/db_schema.xml                                                                            | tfa_country_codes                                                                                                                  |
 | INFO  | DB schema added          | vendor/magento/module-two-factor-auth/etc/db_schema.xml                                                                            | tfa_user_config                                                                                                                    |
+| INFO  | DB schema added          | vendor/paypal/module-braintree-core/etc/db_schema.xml                                                                              | braintree_credit_prices                                                                                                            |
+| INFO  | DB schema added          | vendor/paypal/module-braintree-core/etc/db_schema.xml                                                                              | braintree_transaction_details                                                                                                      |
 | INFO  | DB schema changed        | vendor/magento/module-admin-analytics/etc/db_schema.xml                                                                            | admin_analytics_usage_version_log                                                                                                  |
 | INFO  | DB schema changed        | vendor/magento/module-admin-notification/etc/db_schema.xml                                                                         | admin_system_messages                                                                                                              |
 | INFO  | DB schema changed        | vendor/magento/module-admin-notification/etc/db_schema.xml                                                                         | adminnotification_inbox                                                                                                            |
@@ -471,6 +473,6 @@
 | IGNR  | Preference               | vendor/ampersand/upgrade-patch-helper-test-module/src/module/Model/ToPreferenceAndIgnore.php                                       | Ampersand\Test\Model\ToPreferenceAndIgnore                                                                                         |
 +-------+--------------------------+------------------------------------------------------------------------------------------------------------------------------------+------------------------------------------------------------------------------------------------------------------------------------+
 WARN count: 65
-INFO count: 396
+INFO count: 398
 IGNORE count: 7
 For docs on each check see https://github.com/AmpersandHQ/ampersand-magento2-upgrade-patch-helper/blob/master/docs/CHECKS_AVAILABLE.md

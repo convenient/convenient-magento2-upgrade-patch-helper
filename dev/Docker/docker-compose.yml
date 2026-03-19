@@ -12,6 +12,15 @@ services:
     ports:
       - "9200:9200"
       - "9300:9300"
+  elasticsearch8:
+    container_name: uphelper-elasticsearch8
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.18.0
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+    ports:
+      - "9200:9200"
+      - "9300:9300"
   mysql57:
     container_name: uphelper-mysql57
     image: mysql:5.7.38-debian
@@ -23,7 +32,7 @@ services:
   m2451nodb:
     depends_on:
       - elasticsearch
-    image: ampco/ampersand-magento2-upgrade-patch-helper:2023-11-07
+    image: convenient/upgrade-patch-helper:php-2026-03-19
     platform: linux/amd64
     container_name: uphelper-m2451nodb
     stdin_open: true
@@ -33,18 +42,16 @@ services:
       - excludedvol:/src/dev/instances/
     environment:
       - ID=m2451nodb
-      - COMPOSER_FROM=composer1
-      - PHP_FROM=7.2.34
+      - PHP_FROM=7.2
       - MAGE_FROM=2.3.5
-      - COMPOSER_TO=composer2
-      - PHP_TO=8.1.6
+      - PHP_TO=8.1
       - MAGE_TO=2.4.5-p1
       - NODB=1
       - FUNCTIONAL_TESTS_EXCLUDE_GROUP=v22,v23,v24,v24nodb
   m24nodb:
     depends_on:
       - elasticsearch
-    image: ampco/ampersand-magento2-upgrade-patch-helper:2023-11-07
+    image: convenient/upgrade-patch-helper:php-2026-03-19
     platform: linux/amd64
     container_name: uphelper-m24nodb
     stdin_open: true
@@ -54,11 +61,9 @@ services:
       - excludedvol:/src/dev/instances/
     environment:
       - ID=m24nodb
-      - COMPOSER_FROM=composer1
-      - PHP_FROM=7.2.34
+      - PHP_FROM=7.2
       - MAGE_FROM=2.3.5
-      - COMPOSER_TO=composer2
-      - PHP_TO=8.3.0
+      - PHP_TO=8.3
       - MAGE_TO=2.4.7-p3
       - NODB=1
       - FUNCTIONAL_TESTS_EXCLUDE_GROUP=v22,v23,v24,v2451nodb
@@ -66,7 +71,7 @@ services:
     depends_on:
       - elasticsearch
       - mysql57
-    image: ampco/ampersand-magento2-upgrade-patch-helper:2023-11-07
+    image: convenient/upgrade-patch-helper:php-2026-03-19
     platform: linux/amd64
     container_name: uphelper-m24
     stdin_open: true
@@ -76,18 +81,16 @@ services:
       - excludedvol:/src/dev/instances/
     environment:
       - ID=m24
-      - COMPOSER_FROM=composer1
-      - PHP_FROM=7.2.34
+      - PHP_FROM=7.2
       - MAGE_FROM=2.3.5
-      - COMPOSER_TO=composer2
-      - PHP_TO=8.3.0
+      - PHP_TO=8.3
       - MAGE_TO=2.4.7-p3
       - NODB=0
       - FUNCTIONAL_TESTS_EXCLUDE_GROUP=v22,v23,v24nodb,v2451nodb
   m23:
     depends_on:
       - mysql57
-    image: ampco/ampersand-magento2-upgrade-patch-helper:2023-11-07
+    image: convenient/upgrade-patch-helper:php-2026-03-19
     platform: linux/amd64
     container_name: uphelper-m23
     stdin_open: true
@@ -97,18 +100,16 @@ services:
       - excludedvol:/src/dev/instances/
     environment:
       - ID=m23
-      - COMPOSER_FROM=composer1
-      - PHP_FROM=7.2.34
+      - PHP_FROM=7.2
       - MAGE_FROM=2.3.0
-      - COMPOSER_TO=composer2
-      - PHP_TO=7.4.29
+      - PHP_TO=7.4
       - MAGE_TO=2.3.7-p3
       - NODB=0
       - FUNCTIONAL_TESTS_EXCLUDE_GROUP=v22,v24,v24nodb,v2451nodb
   m22:
     depends_on:
       - mysql57
-    image: ampco/ampersand-magento2-upgrade-patch-helper:2023-11-07
+    image: convenient/upgrade-patch-helper:php-2026-03-19
     platform: linux/amd64
     container_name: uphelper-m22
     stdin_open: true
@@ -118,11 +119,9 @@ services:
       - excludedvol:/src/dev/instances/
     environment:
       - ID=m22
-      - COMPOSER_FROM=composer1
-      - PHP_FROM=7.2.34
+      - PHP_FROM=7.2
       - MAGE_FROM=2.2.0
-      - COMPOSER_TO=composer1
-      - PHP_TO=7.2.34
+      - PHP_TO=7.2
       - MAGE_TO=2.2.11
       - NODB=0
       - FUNCTIONAL_TESTS_EXCLUDE_GROUP=v23,v24,v24nodb,v2451nodb

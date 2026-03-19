@@ -1,12 +1,16 @@
 #!/bin/bash
 source /root/.bashrc
 set -euo pipefail
+git config --global --add safe.directory /src
+
 cd /src/dev
-export COMPOSER_MEMORY_LIMIT=4G
+export COMPOSER_MEMORY_LIMIT=-1
 
 # disable xdebug for performance
 for ini in `ls  /root/.phpenv/versions/*/etc/conf.d/xdebug.ini`; do
+  if [ -f "$ini" ]; then
   mv "$ini" "$ini.bak"
+  fi
 done
 
 # Run quick php -l check for all files for all versions of php
@@ -45,56 +49,50 @@ phpenv global $PHP_FROM
 
 # Prepare composer project
 # See https://store.fooman.co.nz/blog/no-authentication-needed-magento-2-mirror.html
-echo "Preparing project at $MAGE_FROM using $COMPOSER_FROM"
-$COMPOSER_FROM create-project --repository=https://repo-magento-mirror.fooman.co.nz/ magento/project-community-edition=$MAGE_FROM ./instances/magento$ID/  --no-install
+echo "Preparing project at $MAGE_FROM using composer2"
+composer2 create-project --repository=https://repo-magento-mirror.fooman.co.nz/ magento/project-community-edition=$MAGE_FROM ./instances/magento$ID/  --no-install
 cd instances/magento$ID/
-$COMPOSER_FROM config --unset repo.0
-$COMPOSER_FROM config repositories.ampersandtesthyvaextended '{"type": "path", "url": "./../../TestHyvaExtendedTheme/", "options": {"symlink":false}}'
-$COMPOSER_FROM config repositories.ampersandtesthyvastub '{"type": "path", "url": "./../../TestHyvaThemeStub/", "options": {"symlink":false}}'
-$COMPOSER_FROM config repositories.ampersandtesthyvafallback '{"type": "path", "url": "./../../TestHyvaFallbackTheme/", "options": {"symlink":false}}'
-$COMPOSER_FROM config repositories.ampersandtestmodule '{"type": "path", "url": "./../../TestVendorModule/", "options": {"symlink":false}}'
-$COMPOSER_FROM config repositories.ampersandtestmoduletoberemoved '{"type": "path", "url": "./../../TestVendorModuleToBeRemoved/", "options": {"symlink":false}}'
-$COMPOSER_FROM config repo.foomanmirror composer https://repo-magento-mirror.fooman.co.nz/
-$COMPOSER_FROM config minimum-stability dev
-$COMPOSER_FROM config prefer-stable true
-$COMPOSER_FROM require ampersand/upgrade-patch-helper-test-hyva-fallback-theme:"*" --no-update
-$COMPOSER_FROM require ampersand/upgrade-patch-helper-test-hyva-theme-stub:"*" --no-update
-$COMPOSER_FROM require ampersand/upgrade-patch-helper-test-hyva-theme-extended:"*" --no-update
-$COMPOSER_FROM require ampersand/upgrade-patch-helper-test-module:"*" --no-update
-$COMPOSER_FROM require ampersand/upgrade-patch-helper-test-module-to-be-removed:"*" --no-update
-for devpackage in $($COMPOSER_FROM show -s | sed -n '/requires (dev)$/,/^$/p' | grep -v 'requires (dev)' | cut -d ' ' -f1); do
-  echo "$COMPOSER_FROM remove --dev $devpackage --no-update"
-  $COMPOSER_FROM remove --dev $devpackage --no-update
+composer2 config --json audit.block-insecure false # to allow install of older versions
+# https://github.com/composer/composer/issues/12623#issuecomment-3551953185
+composer config --unset repositories || true
+composer2 config --unset repo.0
+composer2 config repositories.ampersandtesthyvaextended '{"type": "path", "url": "./../../TestHyvaExtendedTheme/", "options": {"symlink":false}}'
+composer2 config repositories.ampersandtesthyvastub '{"type": "path", "url": "./../../TestHyvaThemeStub/", "options": {"symlink":false}}'
+composer2 config repositories.ampersandtesthyvafallback '{"type": "path", "url": "./../../TestHyvaFallbackTheme/", "options": {"symlink":false}}'
+composer2 config repositories.ampersandtestmodule '{"type": "path", "url": "./../../TestVendorModule/", "options": {"symlink":false}}'
+composer2 config repositories.ampersandtestmoduletoberemoved '{"type": "path", "url": "./../../TestVendorModuleToBeRemoved/", "options": {"symlink":false}}'
+composer2 config repo.foomanmirror composer https://repo-magento-mirror.fooman.co.nz/
+composer2 config minimum-stability dev
+composer2 config prefer-stable true
+composer2 require ampersand/upgrade-patch-helper-test-hyva-fallback-theme:"*" --no-update
+composer2 require ampersand/upgrade-patch-helper-test-hyva-theme-stub:"*" --no-update
+composer2 require ampersand/upgrade-patch-helper-test-hyva-theme-extended:"*" --no-update
+composer2 require ampersand/upgrade-patch-helper-test-module:"*" --no-update
+composer2 require ampersand/upgrade-patch-helper-test-module-to-be-removed:"*" --no-update
+for devpackage in $(composer2 show -s | sed -n '/requires (dev)$/,/^$/p' | grep -v 'requires (dev)' | cut -d ' ' -f1); do
+  echo "composer2 remove --dev $devpackage --no-update"
+  composer2 remove --dev $devpackage --no-update
 done
-if [ "$COMPOSER_FROM" == "composer2" ]; then
-  $COMPOSER_FROM config --no-interaction allow-plugins.dealerdirect/phpcodesniffer-composer-installer true
-  $COMPOSER_FROM config --no-interaction allow-plugins.laminas/laminas-dependency-plugin true
-  $COMPOSER_FROM config --no-interaction allow-plugins.magento/* true
-  $COMPOSER_FROM install --no-interaction
-else
-  $COMPOSER_FROM install --no-interaction --ignore-platform-reqs
-fi
+composer2 config --no-interaction allow-plugins.dealerdirect/phpcodesniffer-composer-installer true
+composer2 config --no-interaction allow-plugins.laminas/laminas-dependency-plugin true
+composer2 config --no-interaction allow-plugins.magento/* true
+composer2 install --no-interaction --ignore-platform-reqs
 
 # Backup vendor
 echo "mv vendor/ vendor_orig/"
 mv vendor/ vendor_orig/
 
-echo "setting php to version $PHP_TO and $COMPOSER_TO"
+echo "setting php to version $PHP_TO and composer2"
 phpenv global $PHP_TO
 php -v
 
 echo "Upgrading magento to $MAGE_TO"
-$COMPOSER_TO require magento/product-community-edition $MAGE_TO --no-update
-if [ "$COMPOSER_TO" == "composer2" ]; then
-  $COMPOSER_TO config --no-interaction allow-plugins.dealerdirect/phpcodesniffer-composer-installer true
-  $COMPOSER_TO config --no-interaction allow-plugins.laminas/laminas-dependency-plugin true
-  $COMPOSER_TO config --no-interaction allow-plugins.magento/* true
-  $COMPOSER_TO update --with-all-dependencies --no-interaction
-  $COMPOSER_TO install --no-interaction
-else
-  $COMPOSER_TO update composer/composer magento/product-community-edition --with-dependencies --ignore-platform-reqs
-  $COMPOSER_TO install --no-interaction --ignore-platform-reqs
-fi
+composer2 require magento/product-community-edition $MAGE_TO --no-update
+composer2 config --no-interaction allow-plugins.dealerdirect/phpcodesniffer-composer-installer true
+composer2 config --no-interaction allow-plugins.laminas/laminas-dependency-plugin true
+composer2 config --no-interaction allow-plugins.magento/* true
+composer2 update --with-all-dependencies --no-interaction
+composer2 install --no-interaction --ignore-platform-reqs
 # Spoof some changes into our "third party" test module so they appear in the diff
 echo "<span/>"  >> vendor/ampersand/upgrade-patch-helper-test-hyva-fallback-theme/theme/Magento_Customer/templates/account/dashboard/info.phtml
 echo "<span/>"  >> vendor/ampersand/upgrade-patch-helper-test-hyva-theme-stub/theme/Magento_Checkout/templates/cart/form.phtml
@@ -159,15 +157,23 @@ if [ "$NODB" == "0" ]; then
   mysql -uroot -h$HOSTNAME --port=9999 -e "drop database if exists testmagento$ID;" -vvv
   mysql -uroot -h$HOSTNAME --port=9999 -e "create database testmagento$ID;" -vvv
 
-  echo "Test elasticsearch connectivity"
+  SEARCH_ENGINE_VERSION="elasticsearch7"
+  if [[ "$MAGE_TO" == 2.4.8* ]]; then
+    SEARCH_ENGINE_VERSION="elasticsearch8"
+  fi
+  if [[ "$MAGE_TO" == 2.4.9* ]]; then
+    SEARCH_ENGINE_VERSION="elasticsearch8"
+  fi
+
   ES_INSTALL_PARAM=''
   if [[ ! "$MAGE_TO" == 2.3* ]]; then
     if curl http://$HOSTNAME:9200; then
-      ES_INSTALL_PARAM=" --search-engine=elasticsearch7 --elasticsearch-host=$HOSTNAME "
+      ES_INSTALL_PARAM=" --search-engine=$SEARCH_ENGINE_VERSION --elasticsearch-host=$HOSTNAME "
     fi
   fi
 
-  echo "Installing magento"
+  echo "Installing magento: $ES_INSTALL_PARAM"
+  set -v
   # Install magento
   php -d memory_limit=1024M bin/magento setup:install \
       --admin-firstname=ampersand --admin-lastname=developer --admin-email=example@example.com \
@@ -196,5 +202,5 @@ echo "Generate patch file for analysis"
 diff -ur -N vendor_orig/ vendor/ > vendor.patch || true
 
 cd /src/
-$COMPOSER_TO install --no-interaction
+composer2 install --no-interaction --ignore-platform-reqs
 set +e
