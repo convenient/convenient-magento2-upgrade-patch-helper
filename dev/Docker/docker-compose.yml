@@ -50,7 +50,7 @@ services:
       - FUNCTIONAL_TESTS_EXCLUDE_GROUP=v22,v23,v24,v24nodb
   m24nodb:
     depends_on:
-      - elasticsearch
+      - elasticsearch8
     image: convenient/upgrade-patch-helper:php-2026-03-19
     platform: linux/amd64
     container_name: uphelper-m24nodb
@@ -63,13 +63,13 @@ services:
       - ID=m24nodb
       - PHP_FROM=7.2
       - MAGE_FROM=2.3.5
-      - PHP_TO=8.3
-      - MAGE_TO=2.4.7-p3
+      - PHP_TO=8.5
+      - MAGE_TO=2.4.9-beta1
       - NODB=1
       - FUNCTIONAL_TESTS_EXCLUDE_GROUP=v22,v23,v24,v2451nodb
   m24:
     depends_on:
-      - elasticsearch
+      - elasticsearch8
       - mysql57
     image: convenient/upgrade-patch-helper:php-2026-03-19
     platform: linux/amd64
@@ -83,8 +83,8 @@ services:
       - ID=m24
       - PHP_FROM=7.2
       - MAGE_FROM=2.3.5
-      - PHP_TO=8.3
-      - MAGE_TO=2.4.7-p3
+      - PHP_TO=8.5
+      - MAGE_TO=2.4.9-beta1
       - NODB=0
       - FUNCTIONAL_TESTS_EXCLUDE_GROUP=v22,v23,v24nodb,v2451nodb
   m23:
