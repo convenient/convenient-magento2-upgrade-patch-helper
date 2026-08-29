@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<!-- Formatting and presentation metadata changed. -->
+<config>
+    <system>
+        <section id="presentation">
+            <group id="settings">
+                <field id="field" type="text" sortOrder="100" translate="label">
+                    <label>Updated label</label>
+                    <comment>Updated comment</comment>
+                </field>
+            </group>
+        </section>
+    </system>
+</config>

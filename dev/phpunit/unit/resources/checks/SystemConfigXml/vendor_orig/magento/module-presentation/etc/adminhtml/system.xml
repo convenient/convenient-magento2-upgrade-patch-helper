@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<config>
+    <system>
+        <section id="presentation">
+            <group id="settings">
+                <field id="field" type="text" sortOrder="1" translate="label comment">
+                    <label>Original label</label>
+                    <comment>Original comment</comment>
+                </field>
+            </group>
+        </section>
+    </system>
+</config>

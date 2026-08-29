@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<config>
+    <system>
+        <section id="general">
+            <group id="settings">
+                <field id="enabled" type="select" sortOrder="30" translate="label">
+                    <label>Enable module</label>
+                    <comment>Updated presentation</comment>
+                    <source_model>Vendor\Module\Source\Updated</source_model>
+                </field>
+                <field id="new_only" type="text"><label>New field</label></field>
+                <field id="moved" type="text"><config_path>new/config/path</config_path></field>
+                <field id="presentation_only" type="text" sortOrder="999" translate="label">
+                    <label>Updated label</label>
+                    <comment>Updated comment</comment>
+                </field>
+                <group id="advanced">
+                    <field id="nested" type="text"><backend_model>Vendor\Module\Backend\Updated</backend_model></field>
+                </group>
+            </group>
+        </section>
+    </system>
+</config>

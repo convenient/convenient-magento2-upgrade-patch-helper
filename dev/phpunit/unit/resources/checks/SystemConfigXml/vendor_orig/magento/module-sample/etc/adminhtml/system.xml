@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<config>
+    <system>
+        <section id="general">
+            <group id="settings">
+                <field id="enabled" type="select" sortOrder="10" translate="label comment">
+                    <label>Enabled</label>
+                    <comment>Original presentation</comment>
+                    <source_model>Vendor\Module\Source\Original</source_model>
+                </field>
+                <field id="old_only" type="text"><label>Old field</label></field>
+                <field id="moved" type="text"><config_path>legacy/config/path</config_path></field>
+                <field id="presentation_only" type="text" sortOrder="20" translate="label comment">
+                    <label>Original label</label>
+                    <comment>Original comment</comment>
+                </field>
+                <group id="advanced">
+                    <field id="nested" type="text"><backend_model>Vendor\Module\Backend\Original</backend_model></field>
+                </group>
+            </group>
+        </section>
+    </system>
+</config>

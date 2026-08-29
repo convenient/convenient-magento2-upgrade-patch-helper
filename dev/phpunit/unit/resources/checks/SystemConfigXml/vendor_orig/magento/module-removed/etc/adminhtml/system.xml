@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<config>
+    <system>
+        <section id="removed_section">
+            <group id="removed_group">
+                <field id="removed_field" type="text"><label>Removed field</label></field>
+            </group>
+        </section>
+    </system>
+</config>

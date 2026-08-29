@@ -39,6 +39,10 @@ make docker-test ENV=m24nodb PHPUNIT_ARGS='--filter testNameGoesHere'
 
 The available environments and their Magento/PHP combinations are defined in `dev/Docker/docker-compose.yml`. CI runs static analysis and unit tests first, then runs the Docker functional matrix. Do not assume an individual functional environment represents every supported version pair.
 
+When running a command directly inside an already-running `uphelper-*` fixture, use Bash rather than `sh` and source `/root/.bashrc` first, as `dev/Docker/run-phpunit-functional-tests.sh` does. This initializes `phpenv` and makes the selected `php` executable available.
+
+When a functional report golden-file assertion fails, inspect the failure-only artifact at `dev/phpunit/functional/actual_output/<expected-filename>.actual`. This directory is ignored by Git; use its complete report when updating golden files rather than PHPUnit's terminal diff.
+
 For an existing, already-running fixture, make a targeted source-file change visible in its upgraded tree with:
 
 ```bash

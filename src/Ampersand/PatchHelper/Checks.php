@@ -9,6 +9,9 @@ class Checks
     public const TYPE_QUEUE_CONSUMER_ADDED = 'Queue consumer added';
     public const TYPE_QUEUE_CONSUMER_REMOVED = 'Queue consumer removed';
     public const TYPE_QUEUE_CONSUMER_CHANGED = 'Queue consumer changed';
+    public const TYPE_SYSTEM_CONFIG_ADDED = 'System config added';
+    public const TYPE_SYSTEM_CONFIG_REMOVED = 'System config removed';
+    public const TYPE_SYSTEM_CONFIG_CHANGED = 'System config changed';
     public const TYPE_PREFERENCE_REMOVED = 'Preference Removed';
     public const TYPE_PREFERENCE = 'Preference';
     public const TYPE_METHOD_PLUGIN = 'Plugin';
@@ -40,6 +43,9 @@ class Checks
         self::TYPE_DB_SCHEMA_CHANGED,
         self::TYPE_DB_SCHEMA_REMOVED,
         self::TYPE_DB_SCHEMA_TARGET_CHANGED,
+        self::TYPE_SYSTEM_CONFIG_ADDED,
+        self::TYPE_SYSTEM_CONFIG_REMOVED,
+        self::TYPE_SYSTEM_CONFIG_CHANGED,
         self::TYPE_SETUP_PATCH_DATA,
         self::TYPE_SETUP_PATCH_SCHEMA,
         self::TYPE_SETUP_SCRIPT,

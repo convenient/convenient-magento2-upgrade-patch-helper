@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<config>
+    <system>
+        <section id="added_section">
+            <group id="added_group">
+                <field id="added_field" type="text"><label>Added field</label></field>
+            </group>
+        </section>
+    </system>
+</config>

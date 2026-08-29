@@ -15,6 +15,9 @@
 - [INFO - Queue consumer added](#info---queue-consumer-added)
 - [INFO - Queue consumer removed](#info---queue-consumer-removed)
 - [INFO - Queue consumer changed](#info---queue-consumer-changed)
+- [INFO - System config added](#info---system-config-added)
+- [INFO - System config removed](#info---system-config-removed)
+- [INFO - System config changed](#info---system-config-changed)
 - [INFO - DB schema added](#info---db-schema-added)
 - [INFO - DB schema removed](#info---db-schema-removed)
 - [INFO - DB schema changed](#info---db-schema-changed)
@@ -281,6 +284,48 @@ A queue consumer has been changed.
 ```
 
 Often no action is needed, this is just information that something in the definition of `exportProcessor` has changed.
+
+## INFO - System config added
+
+An `etc/adminhtml/system.xml` file has had configuration paths added.
+
+```
++-------+---------------------+--------------------------------------------------------+--------------------------+
+| Level | Type                | File                                                   | To Check                 |
++-------+---------------------+--------------------------------------------------------+--------------------------+
+| INFO  | System config added | vendor/magento/module-example/etc/adminhtml/system.xml | example/settings/enabled |
++-------+---------------------+--------------------------------------------------------+--------------------------+
+```
+
+Review deployment configuration, custom code, and integrations that may need to set or consume the new value.
+
+## INFO - System config removed
+
+An `etc/adminhtml/system.xml` file has had configuration paths removed.
+
+```
++-------+-----------------------+--------------------------------------------------------+--------------------------+
+| Level | Type                  | File                                                   | To Check                 |
++-------+-----------------------+--------------------------------------------------------+--------------------------+
+| INFO  | System config removed | vendor/magento/module-example/etc/adminhtml/system.xml | example/settings/enabled |
++-------+-----------------------+--------------------------------------------------------+--------------------------+
+```
+
+Review deployment configuration, custom code, and integrations that may still write or read this value.
+
+## INFO - System config changed
+
+An `etc/adminhtml/system.xml` file has had configuration paths changed.
+
+```
++-------+-----------------------+--------------------------------------------------------+--------------------------+
+| Level | Type                  | File                                                   | To Check                 |
++-------+-----------------------+--------------------------------------------------------+--------------------------+
+| INFO  | System config changed | vendor/magento/module-example/etc/adminhtml/system.xml | example/settings/enabled |
++-------+-----------------------+--------------------------------------------------------+--------------------------+
+```
+
+The check ignores `label`, `comment`, `sortOrder`, and `translate` changes. A changed `config_path` is reported as a removal and an addition.
 
 ## INFO - DB schema added	    
 A `db_schema.xml` affecting the highlighted table has been added.  

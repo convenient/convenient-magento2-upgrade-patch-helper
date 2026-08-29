@@ -23,11 +23,15 @@ Identify what evidence the check actually needs: the changed patch entry, upgrad
 
 Add only the stable integration required by the check: a type constant if it represents a distinct report type, validator construction/dispatch, and the appropriate result bucket. Use the existing path and Magento-context helpers rather than duplicating bootstrap or path-resolution logic.
 
-Add a focused unit test with matching fixture data in the established `dev/phpunit` structure. Add a complete user-facing entry to `docs/CHECKS_AVAILABLE.md`, including what is detected, the evidence considered, limits, and the recommended review action. Update scoped functional tests or expected output only when the new behavior needs that coverage.
+Add a focused unit test with matching fixture data in the established `dev/phpunit` structure. Add a concise user-facing entry to `docs/CHECKS_AVAILABLE.md`: lead with a single direct sentence stating what the changed file has added, removed, or changed, then include only the evidence or review action needed to use the result. Match the compact style of nearby check entries; do not restate implementation details unless they affect how a report row is interpreted. Update scoped functional tests or expected output only when the new behavior needs that coverage.
 
 ## Functional fixtures
 
 Use a Docker fixture only when relevant and only if the matching `uphelper-<ENV>` container is already running. Do not start, stop, install, recreate, bootstrap, or rebuild Docker/Magento environments.
+
+Before running a full functional matrix, use `docker ps` to identify the available `uphelper-*` fixtures and ask the user for explicit approval to run them serially. Do not infer approval from authorisation to run a focused fixture. Run only the approved fixtures, one at a time.
+
+When a report golden file differs, inspect the failure-only artifact saved under `dev/phpunit/functional/actual_output/` rather than copying PHPUnit's terminal diff, which may truncate large reports. A new INFO check can also change default-report golden files through their INFO summary count, even when `--show-info` is absent.
 
 For an existing fixture file, use the supported fast iteration route from `dev/`:
 

@@ -34,7 +34,7 @@ class FunctionalTests extends \PHPUnit\Framework\TestCase
 
         $output = implode(PHP_EOL, $output);
 
-        $this->assertEquals($this->fileGetContents('/dev/phpunit/functional/expected_output/magentom22.out.txt'), $output);
+        $this->assertReportOutput('/dev/phpunit/functional/expected_output/magentom22.out.txt', $output);
     }
 
     /**
@@ -86,7 +86,7 @@ class FunctionalTests extends \PHPUnit\Framework\TestCase
             return !preg_match('/^(INFO|IGNORE) count:/', $line);
         }));
 
-        $this->assertEquals($this->fileGetContents('/dev/phpunit/functional/expected_output/magentom23.out.txt'), $output);
+        $this->assertReportOutput('/dev/phpunit/functional/expected_output/magentom23.out.txt', $output);
     }
 
     /**
@@ -106,7 +106,10 @@ class FunctionalTests extends \PHPUnit\Framework\TestCase
             return !preg_match('/^(INFO|IGNORE) count:/', $line);
         }));
 
-        $this->assertEquals($this->fileGetContents('/dev/phpunit/functional/expected_output/magentom23VendorNamespaces.out.txt'), $output);
+        $this->assertReportOutput(
+            '/dev/phpunit/functional/expected_output/magentom23VendorNamespaces.out.txt',
+            $output
+        );
     }
 
     /**
@@ -116,40 +119,51 @@ class FunctionalTests extends \PHPUnit\Framework\TestCase
      */
     public function testAutoApplyPatches()
     {
-        copy(
-            BASE_DIR . '/dev/instances/magentom23/vendor.patch',
-            BASE_DIR . '/dev/instances/magentom23/vendor.patch.bak'
-        );
-        copy(
-            BASE_DIR . '/dev/phpunit/functional/resources/template-change.diff',
-            BASE_DIR . '/dev/instances/magentom23/vendor.patch'
-        );
-        $this->assertFileEquals(
-            BASE_DIR . '/dev/phpunit/functional/resources/template-change.diff',
-            BASE_DIR . '/dev/instances/magentom23/vendor.patch',
-            "vendor.patch did not update for this test"
-        );
-
-        exec($this->generateAnalyseCommand('/dev/instances/magentom23', '--auto-theme-update 5'), $output, $return);
+        $vendorPatchPath = BASE_DIR . '/dev/instances/magentom23/vendor.patch';
+        $vendorPatchBackupPath = $vendorPatchPath . '.bak';
+        $overridePath = BASE_DIR
+            . '/dev/instances/magentom23/app/design/frontend/Ampersand/theme/Magento_Bundle/templates/js/components.phtml';
+        $overrideBaselinePath = BASE_DIR . '/dev/phpunit/functional/resources/auto-apply-before.phtml';
 
         copy(
-            BASE_DIR . '/dev/instances/magentom23/vendor.patch.bak',
-            BASE_DIR . '/dev/instances/magentom23/vendor.patch'
+            $vendorPatchPath,
+            $vendorPatchBackupPath
         );
+        try {
+            copy($overrideBaselinePath, $overridePath);
+            copy(
+                BASE_DIR . '/dev/phpunit/functional/resources/template-change.diff',
+                $vendorPatchPath
+            );
+            $this->assertFileEquals(
+                BASE_DIR . '/dev/phpunit/functional/resources/template-change.diff',
+                $vendorPatchPath,
+                "vendor.patch did not update for this test"
+            );
 
-        $this->assertEquals(0, $return);
-        $this->assertFileEquals(
-            BASE_DIR . '/dev/phpunit/functional/expected_output/auto-apply-patch.txt',
-            BASE_DIR . '/dev/instances/magentom23/app/design/frontend/Ampersand/theme/Magento_Bundle/templates/js/components.phtml',
-            "This file did not get auto patched properly"
-        );
+            exec($this->generateAnalyseCommand('/dev/instances/magentom23', '--auto-theme-update 5'), $output, $return);
 
-        $lastLine = array_pop($output);
-        $this->assertStringStartsWith('You should review the above', $lastLine);
+            $this->assertEquals(0, $return);
+            $this->assertFileEquals(
+                BASE_DIR . '/dev/phpunit/functional/expected_output/auto-apply-patch.txt',
+                $overridePath,
+                "This file did not get auto patched properly"
+            );
 
-        $output = implode(PHP_EOL, $output);
+            $lastLine = array_pop($output);
+            $this->assertStringStartsWith('You should review the above', $lastLine);
 
-        $this->assertEquals($this->fileGetContents('/dev/phpunit/functional/expected_output/magentom23-auto-apply.out.txt'), $output);
+            $output = implode(PHP_EOL, $output);
+
+            $this->assertReportOutput(
+                '/dev/phpunit/functional/expected_output/magentom23-auto-apply.out.txt',
+                $output
+            );
+        } finally {
+            copy($vendorPatchBackupPath, $vendorPatchPath);
+            unlink($vendorPatchBackupPath);
+            copy($overrideBaselinePath, $overridePath);
+        }
     }
 
     /**
@@ -196,7 +210,7 @@ class FunctionalTests extends \PHPUnit\Framework\TestCase
 
         $output = implode(PHP_EOL, $output);
 
-        $this->assertEquals($this->fileGetContents('/dev/phpunit/functional/expected_output/magentom24.out.txt'), $output);
+        $this->assertReportOutput('/dev/phpunit/functional/expected_output/magentom24.out.txt', $output);
     }
 
     /**
@@ -229,7 +243,10 @@ class FunctionalTests extends \PHPUnit\Framework\TestCase
         }));
 
         // We should get the same output regardless of whether we are connected to a DB or not
-        $this->assertEquals($this->fileGetContents('/dev/phpunit/functional/expected_output/magentom2451-nodb.out.txt'), $output);
+        $this->assertReportOutput(
+            '/dev/phpunit/functional/expected_output/magentom2451-nodb.out.txt',
+            $output
+        );
     }
 
     /**
@@ -249,7 +266,7 @@ class FunctionalTests extends \PHPUnit\Framework\TestCase
         $output = implode(PHP_EOL, $output);
 
         // We should get the same output regardless of whether we are connected to a DB or not
-        $this->assertEquals($this->fileGetContents('/dev/phpunit/functional/expected_output/magentom24-nodb.out.txt'), $output);
+        $this->assertReportOutput('/dev/phpunit/functional/expected_output/magentom24-nodb.out.txt', $output);
     }
 
     /**
@@ -269,7 +286,7 @@ class FunctionalTests extends \PHPUnit\Framework\TestCase
         $output = implode(PHP_EOL, $output);
 
         // We should get the same output regardless of whether we are connected to a DB or not
-        $this->assertEquals($this->fileGetContents('/dev/phpunit/functional/expected_output/magentom24-show-info.out.txt'), $output);
+        $this->assertReportOutput('/dev/phpunit/functional/expected_output/magentom24-show-info.out.txt', $output);
     }
 
     /**
@@ -288,7 +305,10 @@ class FunctionalTests extends \PHPUnit\Framework\TestCase
 
         $output = implode(PHP_EOL, $output);
 
-        $this->assertEquals($this->fileGetContents('/dev/phpunit/functional/expected_output/magentom24nodb-threeway-diff.out.txt'), $output);
+        $this->assertReportOutput(
+            '/dev/phpunit/functional/expected_output/magentom24nodb-threeway-diff.out.txt',
+            $output
+        );
     }
 
     /**
@@ -325,7 +345,32 @@ class FunctionalTests extends \PHPUnit\Framework\TestCase
 
         $output = implode(PHP_EOL, $output);
 
-        $this->assertEquals($this->fileGetContents('/dev/phpunit/functional/expected_output/magentom24nodb-changed-consumers.out.txt'), $output);
+        $this->assertReportOutput(
+            '/dev/phpunit/functional/expected_output/magentom24nodb-changed-consumers.out.txt',
+            $output
+        );
+    }
+
+    /**
+     * @param string $expectedOutputFilepath
+     * @param string $output
+     * @return void
+     */
+    private function assertReportOutput($expectedOutputFilepath, $output)
+    {
+        $expectedOutput = $this->fileGetContents($expectedOutputFilepath);
+        if ($expectedOutput === $output) {
+            return;
+        }
+
+        $actualOutputDirectory = BASE_DIR . '/dev/phpunit/functional/actual_output';
+        if (!is_dir($actualOutputDirectory)) {
+            mkdir($actualOutputDirectory, 0777, true);
+        }
+        $actualOutputPath = $actualOutputDirectory . '/' . basename($expectedOutputFilepath) . '.actual';
+        file_put_contents($actualOutputPath, $output);
+
+        $this->fail("Report output did not match. Actual output saved to $actualOutputPath");
     }
 
     /**

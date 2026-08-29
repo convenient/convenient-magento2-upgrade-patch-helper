@@ -1,0 +1,59 @@
+diff -urN vendor_orig/magento/module-sample/etc/adminhtml/system.xml vendor/magento/module-sample/etc/adminhtml/system.xml
+--- vendor_orig/magento/module-sample/etc/adminhtml/system.xml
++++ vendor/magento/module-sample/etc/adminhtml/system.xml
+@@ -4,13 +4,13 @@
+         <section id="general">
+             <group id="settings">
+-                <field id="enabled" type="select" sortOrder="10" translate="label comment">
+-                    <label>Enabled</label>
+-                    <comment>Original presentation</comment>
+-                    <source_model>Vendor\Module\Source\Original</source_model>
++                <field id="enabled" type="select" sortOrder="30" translate="label">
++                    <label>Enable module</label>
++                    <comment>Updated presentation</comment>
++                    <source_model>Vendor\Module\Source\Updated</source_model>
+                 </field>
+-                <field id="old_only" type="text"><label>Old field</label></field>
+-                <field id="moved" type="text"><config_path>legacy/config/path</config_path></field>
++                <field id="new_only" type="text"><label>New field</label></field>
++                <field id="moved" type="text"><config_path>new/config/path</config_path></field>
+             </group>
+         </section>
+diff -urN vendor_orig/magento/module-added/etc/adminhtml/system.xml vendor/magento/module-added/etc/adminhtml/system.xml
+--- vendor_orig/magento/module-added/etc/adminhtml/system.xml
++++ vendor/magento/module-added/etc/adminhtml/system.xml
+@@ -0,0 +1,9 @@
++<?xml version="1.0"?>
++<config><system><section id="added_section"><group id="added_group">
++<field id="added_field" type="text"><label>Added field</label></field>
++</group></section></system></config>
+diff -urN vendor_orig/magento/module-removed/etc/adminhtml/system.xml vendor/magento/module-removed/etc/adminhtml/system.xml
+--- vendor_orig/magento/module-removed/etc/adminhtml/system.xml
++++ vendor/magento/module-removed/etc/adminhtml/system.xml
+@@ -1,9 +0,0 @@
+-<?xml version="1.0"?>
+-<config><system><section id="removed_section"><group id="removed_group">
+-<field id="removed_field" type="text"><label>Removed field</label></field>
+-</group></section></system></config>
+diff -urN vendor_orig/magento/module-presentation/etc/adminhtml/system.xml vendor/magento/module-presentation/etc/adminhtml/system.xml
+--- vendor_orig/magento/module-presentation/etc/adminhtml/system.xml
++++ vendor/magento/module-presentation/etc/adminhtml/system.xml
+@@ -1,10 +1,11 @@
+ <?xml version="1.0"?>
++<!-- Formatting and presentation metadata changed. -->
+ <config>
+     <system><section id="presentation"><group id="settings">
+-        <field id="field" type="text" sortOrder="1" translate="label comment">
+-            <label>Original label</label><comment>Original comment</comment>
++        <field id="field" type="text" sortOrder="100" translate="label">
++            <label>Updated label</label><comment>Updated comment</comment>
+         </field>
+     </group></section></system>
+ </config>
+diff -urN vendor_orig/magento/module-invalid/etc/adminhtml/system.xml vendor/magento/module-invalid/etc/adminhtml/system.xml
+--- vendor_orig/magento/module-invalid/etc/adminhtml/system.xml
++++ vendor/magento/module-invalid/etc/adminhtml/system.xml
+@@ -1,2 +1,2 @@
+ <?xml version="1.0"?>
+-<config><system><section id="invalid"><group id="settings"><field id="field" /></group></section></system></config>
++<config><system><section id="invalid"><group id="settings"><field id="field"></group></section></system></config>
