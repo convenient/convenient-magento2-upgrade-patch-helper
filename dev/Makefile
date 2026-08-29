@@ -3,6 +3,8 @@ list: 					        # Lists all available commands
 
 ENV='provide_ENV_var'
 PHPUNIT_ARGS=''
+SYNC_PATHS :=
+DELETE_PATHS :=
 
 docker-up:       # Launch docker container
 	docker compose --file=./Docker/docker-compose.yml up --remove-orphans -d $(ENV)
@@ -13,6 +15,12 @@ docker-install:  # Prepare the 'manual' steps for running this tool
 
 docker-test:     # Run tests inside container
 	docker exec -e PHPUNIT_ARGS='$(PHPUNIT_ARGS)'  uphelper-$(ENV) ./dev/Docker/run-phpunit-functional-tests.sh
+
+docker-sync-fixtures: # Sync named existing fixture files into an already-running container
+	@test "$(ENV)" != "provide_ENV_var" || (echo "Set ENV, for example ENV=m24"; exit 2)
+	@test -n "$(SYNC_PATHS)$(DELETE_PATHS)" || (echo "Set SYNC_PATHS and/or DELETE_PATHS"; exit 2)
+	@test "$$(docker inspect -f '{{.State.Running}}' uphelper-$(ENV) 2>/dev/null)" = "true" || (echo "uphelper-$(ENV) must already be running"; exit 2)
+	docker exec -e SYNC_PATHS='$(SYNC_PATHS)' -e DELETE_PATHS='$(DELETE_PATHS)' uphelper-$(ENV) ./dev/Docker/sync-test-fixtures.sh
 
 docker-stop-all-containers:     # Stop all upgrade helper docker containers
 	docker container stop uphelper-m24nodb || true

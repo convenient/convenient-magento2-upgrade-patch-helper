@@ -42,3 +42,17 @@ We use a custom docker container with the necessary php versions installed on it
 
 This allows us to run the tests locally and in travis without so much fiddling about.
 
+## Iterating on an existing fixture
+
+`docker-install` deliberately makes a frozen `vendor_orig/` copy before it builds the upgraded `vendor/` tree and applies its fixture-specific mutations. The fixture package directories must therefore not be symlinked into both trees: editing a shared source would erase the before/after comparison, and synchronising a whole package could overwrite those intended upgraded-side mutations.
+
+For a source-file change in an already provisioned fixture, use the targeted sync command from `dev/`. The matching `uphelper-<ENV>` container must already be running; this command never starts, stops, installs, or rebuilds one.
+
+```
+make docker-sync-fixtures ENV=m24 SYNC_PATHS='dev/TestVendorModule/src/module/Model/Example.php'
+make docker-test ENV=m24 PHPUNIT_ARGS='--filter testMagentoTwoFour'
+```
+
+`SYNC_PATHS` and `DELETE_PATHS` accept whitespace-separated, explicitly named files below a direct `dev/Test*/` fixture directory. Package fixtures are mapped using their `composer.json` package name; `dev/TestModule/app/...` is mapped to the instance `app/...` directory. The command copies or removes only the named upgraded-side files, clears that instance's generated code and filesystem cache directories, and regenerates `vendor.patch`. It never writes to `vendor_orig/`, runs Composer, enables modules, installs Magento, or compiles DI.
+
+This is only for files in an existing fixture. Adding a Composer package or module, changing Composer metadata, registration, or module enablement, or needing a rebuilt fixture remains a human-authorised `docker-install` workflow. Do not sync a path that `setup-magento-with-diff.sh` intentionally mutates unless changing that fixture setup is part of the work.
