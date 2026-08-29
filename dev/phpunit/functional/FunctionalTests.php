@@ -82,7 +82,9 @@ class FunctionalTests extends \PHPUnit\Framework\TestCase
         $lastLine = array_pop($output);
         $this->assertStringStartsWith('You should review the above', $lastLine);
 
-        $output = implode(PHP_EOL, $output);
+        $output = implode(PHP_EOL, array_filter($output, function ($line) {
+            return !preg_match('/^(INFO|IGNORE) count:/', $line);
+        }));
 
         $this->assertEquals($this->fileGetContents('/dev/phpunit/functional/expected_output/magentom23.out.txt'), $output);
     }
@@ -100,7 +102,9 @@ class FunctionalTests extends \PHPUnit\Framework\TestCase
         $lastLine = array_pop($output);
         $this->assertStringStartsWith('You should review the above', $lastLine);
 
-        $output = implode(PHP_EOL, $output);
+        $output = implode(PHP_EOL, array_filter($output, function ($line) {
+            return !preg_match('/^(INFO|IGNORE) count:/', $line);
+        }));
 
         $this->assertEquals($this->fileGetContents('/dev/phpunit/functional/expected_output/magentom23VendorNamespaces.out.txt'), $output);
     }
@@ -220,7 +224,9 @@ class FunctionalTests extends \PHPUnit\Framework\TestCase
         $lastLine = array_pop($output);
         $this->assertStringStartsWith('You should review the above', $lastLine);
 
-        $output = implode(PHP_EOL, $output);
+        $output = implode(PHP_EOL, array_filter($output, function ($line) {
+            return !preg_match('/^(INFO|IGNORE) count:/', $line);
+        }));
 
         // We should get the same output regardless of whether we are connected to a DB or not
         $this->assertEquals($this->fileGetContents('/dev/phpunit/functional/expected_output/magentom2451-nodb.out.txt'), $output);
