@@ -107,6 +107,13 @@ class Magento2Instance
         $this->areaConfig['webapi_soap'] = $configLoader->load('webapi_soap');
         $this->areaConfig['global'] = $configLoader->load('global');
 
+        // Load custom areas, some customisations can be quite the surprise
+        foreach ($objectManager->get(\Magento\Framework\App\AreaList::class)->getCodes() as $areaCode) {
+            if (!isset($this->areaConfig[$areaCode])) {
+                $this->areaConfig[$areaCode] = $configLoader->load($areaCode);
+            }
+        }
+
         // All xml files
         $dirList = $objectManager->get(DirectoryList::class);
         $this->listXmlFiles([$dirList->getPath('app'), $dirList->getRoot() . '/vendor']);
