@@ -113,6 +113,10 @@ echo '$b=1;'  >> vendor/ampersand/upgrade-patch-helper-test-module/src/module/Se
 cp vendor/ampersand/upgrade-patch-helper-test-module/src/module/etc/db_schema.after.xml vendor/ampersand/upgrade-patch-helper-test-module/src/module/etc/db_schema.xml
 rm vendor/ampersand/upgrade-patch-helper-test-module-to-be-removed/src/module/etc/db_schema.xml
 
+if [[ "$MAGE_TO" == 2.4* ]]; then
+  sed -i 's|https://before.functional-csp.example|https://after.functional-csp.example|' vendor/ampersand/upgrade-patch-helper-test-module/src/module/etc/csp_whitelist.xml
+fi
+
 if [[ "$MAGE_TO" == 2.3* ]]; then
   echo "<span/>"  >> vendor/magento/module-bundle/view/frontend/templates/js/components.phtml
 fi

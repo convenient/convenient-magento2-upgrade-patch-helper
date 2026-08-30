@@ -1,0 +1,3 @@
+<csp_whitelist><policies><policy id="script-src"><values>
+<value id="original-hash-id" type="hash" algorithm="sha256">c2FtZS1oYXNoLXZhbHVl</value>
+</values></policy></policies></csp_whitelist>

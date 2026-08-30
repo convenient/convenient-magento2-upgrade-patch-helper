@@ -18,6 +18,9 @@
 - [INFO - System config added](#info---system-config-added)
 - [INFO - System config removed](#info---system-config-removed)
 - [INFO - System config changed](#info---system-config-changed)
+- [INFO - CSP added](#info---csp-added)
+- [INFO - CSP removed](#info---csp-removed)
+- [INFO - CSP changed](#info---csp-changed)
 - [INFO - DB schema added](#info---db-schema-added)
 - [INFO - DB schema removed](#info---db-schema-removed)
 - [INFO - DB schema changed](#info---db-schema-changed)
@@ -326,6 +329,54 @@ An `etc/adminhtml/system.xml` file has had configuration paths changed.
 ```
 
 The check ignores `label`, `comment`, `sortOrder`, and `translate` changes. A changed `config_path` is reported as a removal and an addition.
+
+## INFO - CSP added
+
+An `etc/csp_whitelist.xml` declaration has been added.
+
+Example:
+
+```
++-------+-----------+-----------------------------------------------------+-----------------------+
+| Level | Type      | File                                                | To Check              |
++-------+-----------+-----------------------------------------------------+-----------------------+
+| INFO  | CSP added | vendor/magento/module-example/etc/csp_whitelist.xml | script-src/analytics  |
++-------+-----------+-----------------------------------------------------+-----------------------+
+```
+
+Review CSP customisations and integrations that may need the newly allowed source.
+
+## INFO - CSP removed
+
+An `etc/csp_whitelist.xml` declaration has been removed.
+
+Example:
+
+```
++-------+-------------+-----------------------------------------------------+-----------------------+
+| Level | Type        | File                                                | To Check              |
++-------+-------------+-----------------------------------------------------+-----------------------+
+| INFO  | CSP removed | vendor/magento/module-example/etc/csp_whitelist.xml | script-src/legacy     |
++-------+-------------+-----------------------------------------------------+-----------------------+
+```
+
+Review CSP customisations and integrations that may still depend on the removed source.
+
+## INFO - CSP changed
+
+An `etc/csp_whitelist.xml` declaration has changed.
+
+Example:
+
+```
++-------+-------------+-----------------------------------------------------+-----------------------+
+| Level | Type        | File                                                | To Check              |
++-------+-------------+-----------------------------------------------------+-----------------------+
+| INFO  | CSP changed | vendor/magento/module-example/etc/csp_whitelist.xml | script-src/checkout   |
++-------+-------------+-----------------------------------------------------+-----------------------+
+```
+
+Review the upgrade patch for the previous and replacement definitions, then check CSP customisations and integrations for compatibility.
 
 ## INFO - DB schema added	    
 A `db_schema.xml` affecting the highlighted table has been added.  

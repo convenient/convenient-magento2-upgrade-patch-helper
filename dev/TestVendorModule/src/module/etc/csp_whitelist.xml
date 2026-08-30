@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<csp_whitelist>
+    <policies>
+        <policy id="script-src">
+            <values>
+                <value id="functional-csp-host" type="host">https://before.functional-csp.example</value>
+            </values>
+        </policy>
+    </policies>
+</csp_whitelist>

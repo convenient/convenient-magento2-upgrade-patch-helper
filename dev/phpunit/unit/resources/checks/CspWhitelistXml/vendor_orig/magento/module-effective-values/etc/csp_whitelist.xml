@@ -1,0 +1,9 @@
+<csp_whitelist><policies>
+<policy id="script-src"><values>
+<value id="algorithm-hash" type="hash" algorithm="sha256">c2FtZS1oYXNo</value>
+</values></policy>
+<policy id="connect-src"><values>
+<value id="changed-host" type="host">https://before.example</value>
+<value id="ignored-host-attribute" type="host" algorithm="sha256">https://stable.example</value>
+</values></policy>
+</policies></csp_whitelist>

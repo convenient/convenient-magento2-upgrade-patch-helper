@@ -1,0 +1,3 @@
+<csp_whitelist><policies><policy id="img-src"><values>
+<value id="new_host" type="host">https://images.example</value>
+</values></policy></policies></csp_whitelist>

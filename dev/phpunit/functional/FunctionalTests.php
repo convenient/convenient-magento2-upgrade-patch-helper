@@ -370,7 +370,12 @@ class FunctionalTests extends \PHPUnit\Framework\TestCase
         $actualOutputPath = $actualOutputDirectory . '/' . basename($expectedOutputFilepath) . '.actual';
         file_put_contents($actualOutputPath, $output);
 
-        $this->fail("Report output did not match. Actual output saved to $actualOutputPath");
+        $diff = (new \SebastianBergmann\Diff\Differ("--- Expected report output\n+++ Actual report output\n"))
+            ->diff($expectedOutput, $output);
+
+        $this->fail(
+            "Report output did not match. Actual output saved to $actualOutputPath" . PHP_EOL . PHP_EOL . $diff
+        );
     }
 
     /**

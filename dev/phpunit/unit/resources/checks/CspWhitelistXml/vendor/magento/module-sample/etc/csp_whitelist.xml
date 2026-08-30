@@ -1,0 +1,6 @@
+<csp_whitelist><policies><policy id="script-src"><values>
+<value id="stable_host" type="host">https://stable.example</value>
+<value algorithm="sha384" type="hash" id="shared_hash">'updated-hash'</value>
+<value id="type_only" type="hash" algorithm="sha256">same-value</value>
+<value id="added_host" type="host">https://added.example</value>
+</values></policy></policies></csp_whitelist>

@@ -16,7 +16,7 @@ docker-install:  # Prepare the 'manual' steps for running this tool
 docker-test:     # Run tests inside container
 	docker exec -e PHPUNIT_ARGS='$(PHPUNIT_ARGS)'  uphelper-$(ENV) ./dev/Docker/run-phpunit-functional-tests.sh
 
-docker-sync-fixtures: # Sync named existing fixture files into an already-running container
+docker-sync-fixtures: # Sync named existing or new fixture files into an already-running container
 	@test "$(ENV)" != "provide_ENV_var" || (echo "Set ENV, for example ENV=m24"; exit 2)
 	@test -n "$(SYNC_PATHS)$(DELETE_PATHS)" || (echo "Set SYNC_PATHS and/or DELETE_PATHS"; exit 2)
 	@test "$$(docker inspect -f '{{.State.Running}}' uphelper-$(ENV) 2>/dev/null)" = "true" || (echo "uphelper-$(ENV) must already be running"; exit 2)

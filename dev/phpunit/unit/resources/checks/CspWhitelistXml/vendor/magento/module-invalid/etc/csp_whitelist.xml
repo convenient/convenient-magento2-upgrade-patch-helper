@@ -1,0 +1,1 @@
+<csp_whitelist><policies><policy id="default-src"><values><value id="invalid" type="host">https://invalid.example</values></policy></policies></csp_whitelist>

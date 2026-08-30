@@ -1,0 +1,3 @@
+<csp_whitelist><policies>
+<policy id="script-src"><values><value id="shared" type="host">https://original.example</value></values></policy>
+</policies></csp_whitelist>

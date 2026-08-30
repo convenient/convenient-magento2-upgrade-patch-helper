@@ -1,0 +1,104 @@
+diff -urN vendor_orig/magento/module-sample/etc/csp_whitelist.xml vendor/magento/module-sample/etc/csp_whitelist.xml
+--- vendor_orig/magento/module-sample/etc/csp_whitelist.xml
++++ vendor/magento/module-sample/etc/csp_whitelist.xml
+@@ -1,9 +1,9 @@
+ <csp_whitelist><policies><policy id="script-src"><values>
+ <value id="stable_host" type="host">https://stable.example</value>
+-<value id="shared_hash" type="hash" algorithm="sha256">'original-hash'</value>
+-<value id="type_only" type="host">same-value</value>
+-<value id="removed_host" type="host">https://removed.example</value>
++<value algorithm="sha384" type="hash" id="shared_hash">'updated-hash'</value>
++<value id="type_only" type="hash" algorithm="sha256">same-value</value>
++<value id="added_host" type="host">https://added.example</value>
+ </values></policy></policies></csp_whitelist>
+diff -urN vendor_orig/magento/module-added/etc/csp_whitelist.xml vendor/magento/module-added/etc/csp_whitelist.xml
+--- vendor_orig/magento/module-added/etc/csp_whitelist.xml
++++ vendor/magento/module-added/etc/csp_whitelist.xml
+@@ -0,0 +1,3 @@
++<csp_whitelist><policies><policy id="img-src"><values>
++<value id="new_host" type="host">https://images.example</value>
++</values></policy></policies></csp_whitelist>
+diff -urN vendor_orig/magento/module-removed/etc/csp_whitelist.xml vendor/magento/module-removed/etc/csp_whitelist.xml
+--- vendor_orig/magento/module-removed/etc/csp_whitelist.xml
++++ vendor/magento/module-removed/etc/csp_whitelist.xml
+@@ -1,3 +0,0 @@
+-<csp_whitelist><policies><policy id="connect-src"><values>
+-<value id="old_host" type="host">https://api.example</value>
+-</values></policy></policies></csp_whitelist>
+diff -urN vendor_orig/magento/module-reordered/etc/csp_whitelist.xml vendor/magento/module-reordered/etc/csp_whitelist.xml
+--- vendor_orig/magento/module-reordered/etc/csp_whitelist.xml
++++ vendor/magento/module-reordered/etc/csp_whitelist.xml
+@@ -1,3 +1,4 @@
+-<csp_whitelist><policies><policy id="style-src"><values><value id="same" type="hash" algorithm="sha256">styles-hash</value></values></policy></policies></csp_whitelist>
++<csp_whitelist>
++    <policies><policy id="style-src"><values>
++        <value algorithm="sha256" type="hash" id="same">styles-hash</value>
++    </values></policy></policies></csp_whitelist>
+diff -urN vendor_orig/magento/module-shared-id/etc/csp_whitelist.xml vendor/magento/module-shared-id/etc/csp_whitelist.xml
+--- vendor_orig/magento/module-shared-id/etc/csp_whitelist.xml
++++ vendor/magento/module-shared-id/etc/csp_whitelist.xml
+@@ -1,3 +1,4 @@
+ <csp_whitelist><policies>
+-<policy id="script-src"><values><value id="shared" type="host">https://original.example</value></values></policy>
++<policy id="script-src"><values><value id="shared" type="host">https://changed.example</value></values></policy>
++<policy id="img-src"><values><value id="shared" type="host">https://images.example</value></values></policy>
+ </policies></csp_whitelist>
+diff -urN vendor_orig/magento/module-policy-only/etc/csp_whitelist.xml vendor/magento/module-policy-only/etc/csp_whitelist.xml
+--- vendor_orig/magento/module-policy-only/etc/csp_whitelist.xml
++++ vendor/magento/module-policy-only/etc/csp_whitelist.xml
+@@ -1 +1 @@
+-<csp_whitelist><policies><policy id="old-src" /></policies></csp_whitelist>
++<csp_whitelist><policies><policy id="new-src" /></policies></csp_whitelist>
+diff -urN vendor_orig/magento/module-invalid/etc/csp_whitelist.xml vendor/magento/module-invalid/etc/csp_whitelist.xml
+--- vendor_orig/magento/module-invalid/etc/csp_whitelist.xml
++++ vendor/magento/module-invalid/etc/csp_whitelist.xml
+@@ -1 +1 @@
+-<csp_whitelist><policies><policy id="default-src"><values><value id="valid" type="host">https://valid.example</value></values></policy></policies></csp_whitelist>
++<csp_whitelist><policies><policy id="default-src"><values><value id="invalid" type="host">https://invalid.example</values></policy></policies></csp_whitelist>
+diff -urN vendor_orig/magento/module-original-invalid/etc/csp_whitelist.xml vendor/magento/module-original-invalid/etc/csp_whitelist.xml
+--- vendor_orig/magento/module-original-invalid/etc/csp_whitelist.xml
++++ vendor/magento/module-original-invalid/etc/csp_whitelist.xml
+@@ -1 +1 @@
+-<csp_whitelist><policies><policy id="default-src"><values><value id="invalid" type="host">https://invalid.example</values></policy></policies></csp_whitelist>
++<csp_whitelist><policies><policy id="default-src"><values><value id="valid" type="host">https://valid.example</value></values></policy></policies></csp_whitelist>
+diff -urN vendor_orig/magento/module-whitespace/etc/csp_whitelist.xml vendor/magento/module-whitespace/etc/csp_whitelist.xml
+--- vendor_orig/magento/module-whitespace/etc/csp_whitelist.xml
++++ vendor/magento/module-whitespace/etc/csp_whitelist.xml
+@@ -1,3 +1,3 @@
+ <csp_whitelist><policies><policy id="style-src"><values>
+-<value id="space-sensitive" type="hash" algorithm="sha256">styles-hash</value>
++<value algorithm="sha256" type="hash" id="space-sensitive"> styles-hash </value>
+ </values></policy></policies></csp_whitelist>
+diff -urN vendor_orig/magento/module-multiple-values/etc/csp_whitelist.xml vendor/magento/module-multiple-values/etc/csp_whitelist.xml
+--- vendor_orig/magento/module-multiple-values/etc/csp_whitelist.xml
++++ vendor/magento/module-multiple-values/etc/csp_whitelist.xml
+@@ -1,4 +1,4 @@
+ <csp_whitelist><policies><policy id="connect-src">
+ <values><value id="stable" type="host">https://stable.example</value></values>
+-<values><value id="second-block" type="host">https://before.example</value></values>
++<values><value id="second-block" type="host">https://after.example</value></values>
+ </policy></policies></csp_whitelist>
+diff -urN vendor_orig/magento/module-hash-id/etc/csp_whitelist.xml vendor/magento/module-hash-id/etc/csp_whitelist.xml
+--- vendor_orig/magento/module-hash-id/etc/csp_whitelist.xml
++++ vendor/magento/module-hash-id/etc/csp_whitelist.xml
+@@ -1,3 +1,3 @@
+ <csp_whitelist><policies><policy id="script-src"><values>
+-<value id="original-hash-id" type="hash" algorithm="sha256">c2FtZS1oYXNoLXZhbHVl</value>
++<value id="replacement-hash-id" type="hash" algorithm="sha256">c2FtZS1oYXNoLXZhbHVl</value>
+ </values></policy></policies></csp_whitelist>
+diff -urN vendor_orig/magento/module-effective-values/etc/csp_whitelist.xml vendor/magento/module-effective-values/etc/csp_whitelist.xml
+--- vendor_orig/magento/module-effective-values/etc/csp_whitelist.xml
++++ vendor/magento/module-effective-values/etc/csp_whitelist.xml
+@@ -1,9 +1,9 @@
+ <csp_whitelist><policies>
+ <policy id="script-src"><values>
+-<value id="algorithm-hash" type="hash" algorithm="sha256">c2FtZS1oYXNo</value>
++<value id="algorithm-hash" type="hash" algorithm="sha384">c2FtZS1oYXNo</value>
+ </values></policy>
+ <policy id="connect-src"><values>
+-<value id="changed-host" type="host">https://before.example</value>
+-<value id="ignored-host-attribute" type="host" algorithm="sha256">https://stable.example</value>
++<value id="changed-host" type="host">https://after.example</value>
++<value id="ignored-host-attribute" type="host" algorithm="sha384">https://stable.example</value>
+ </values></policy>
+ </policies></csp_whitelist>

@@ -19,6 +19,40 @@ The current `analyse` command expects that unified patch as `vendor.patch` at th
 
 The report identifies upgrade impacts that may need review. Refer to [docs/CHECKS_AVAILABLE.md](docs/CHECKS_AVAILABLE.md) for the complete, current list of checks and their recommended actions. Treat `WARN` items as targeted review work; use `--show-info` and `--show-ignore` for the broader report.
 
+## Magento reference source
+
+For changes that interpret Magento behaviour—such as XML/config merging, DI, layouts, service/API contracts, schema/setup, indexing, or security policy—ground the implementation in Magento source before coding. This does not apply to generic helper or test infrastructure unless it encodes Magento behaviour.
+
+- Start with the local Magento 2.4.8 reference checkout at `dev/vanilla/vendor/magento/`. Use the relevant schema, reader/converter, service, interface, or other core implementation to establish valid input, effective identity and merge rules, meaningful attributes/text, and any normalisation Magento does or does not perform.
+- Keep this helper's compact parsing and array-lookup approach. The reference establishes what the helper's map must mean; do not copy Magento runtime classes into the helper or require Magento bootstrapping for its unit tests.
+- Normal-behaviour fixtures should be valid against the relevant Magento contract where practical. Use malformed or unsupported inputs only in explicitly named error-path tests.
+- If `dev/vanilla` is absent or incomplete, stop before implementing Magento-semantic behaviour and ask the user to either run:
+
+  ```bash
+  composer create-project --repository=https://mirror.mage-os.org/ magento/project-community-edition:2.4.8 ./dev/vanilla --no-interaction --no-plugins --ignore-platform-reqs
+  ```
+
+  or explicitly authorise the agent to run that exact command. Do not substitute another version, source, or remembered behaviour.
+- When creating the vanilla reference, also install the basic Hyvä reference so Magento-semantic work can inspect both core and standard Hyvä behaviour. From `dev/vanilla`, run:
+
+  ```bash
+  composer config repositories.hyva-themes/magento2-theme-module git https://github.com/hyva-themes/magento2-theme-module.git;
+  composer config repositories.hyva-themes/magento2-default-theme git https://github.com/hyva-themes/magento2-default-theme.git;
+  composer config repositories.hyva-themes/magento2-default-theme-csp git https://github.com/hyva-themes/magento2-default-theme-csp.git;
+  composer config repositories.hyva-themes/magento2-base-layout-reset git https://github.com/hyva-themes/magento2-base-layout-reset.git;
+  composer config repositories.hyva-themes/magento2-compat-module-fallback git https://github.com/hyva-themes/magento2-compat-module-fallback.git;
+  composer config repositories.hyva-themes/magento2-mollie-theme-bundle git https://github.com/hyva-themes/magento2-mollie-theme-bundle.git;
+  composer config repositories.hyva-themes/magento2-luma-checkout git https://github.com/hyva-themes/magento2-luma-checkout.git;
+  composer config repositories.hyva-themes/magento2-theme-fallback git https://github.com/hyva-themes/magento2-theme-fallback.git;
+  composer config repositories.hyva-themes/magento2-order-cancellation-webapi git https://github.com/hyva-themes/magento2-order-cancellation-webapi.git;
+  composer config repositories.hyva-themes/magento2-email-module git https://github.com/hyva-themes/magento2-email-module.git;
+  composer require hyva-themes/magento2-default-theme --ignore-platform-reqs --no-plugins;
+  ```
+
+  This is part of reference creation only; do not run it against an existing reference unless the user explicitly asks to add or refresh Hyvä.
+- Treat 2.4.8 as the default reference. Only when a relevant supported-version fixture fails, differs, or raises a concrete compatibility concern, inspect the matching already-running `uphelper-*` container's `vendor/magento/` source. Do not start, rebuild, or install a fixture merely for source inspection. Reconcile observed version differences so the helper supports the affected versions rather than silently choosing 2.4.8 behaviour.
+- In the final handoff for Magento-semantic work, name the local Magento source paths inspected and any container/version evidence used for a cross-version decision.
+
 ## Local development and tests
 
 Run root checks with:
@@ -49,7 +83,9 @@ For an existing, already-running fixture, make a targeted source-file change vis
 make -C dev docker-sync-fixtures ENV=m24 SYNC_PATHS='dev/TestVendorModule/src/module/Model/Example.php'
 ```
 
-The helper maps only explicitly named paths under direct `dev/Test*/` fixtures, preserves the immutable `vendor_orig/` snapshot, clears filesystem-generated/cache directories, and regenerates `vendor.patch`. Do not symlink test package sources into both vendor trees: shared files would invalidate the frozen before/after comparison and can overwrite deliberate upgraded-side fixture mutations. The sync route is for existing files only; new packages/modules, Composer or registration changes, module enablement, and rebuilds require explicit human authorisation. Never start, stop, install, or rebuild Docker/Magento fixtures unless the user asks.
+The helper maps only explicitly named paths under direct `dev/Test*/` fixtures, preserves the immutable `vendor_orig/` snapshot, clears filesystem-generated/cache directories, and regenerates `vendor.patch`. `SYNC_PATHS` can add a new source file to the upgraded tree as well as update an existing one; it never creates an original-side counterpart. Do not symlink test package sources into both vendor trees: shared files would invalidate the frozen before/after comparison and can overwrite deliberate upgraded-side fixture mutations. New packages/modules, Composer or registration changes, module enablement, and rebuilds require explicit human authorisation. Never start, stop, install, or rebuild Docker/Magento fixtures unless the user asks.
+
+If a new file must be validated as a **changed** entry in an already-running fixture, explain that normal `SYNC_PATHS` creates an addition because it writes upgraded `vendor/` only, then ask the user for explicit authority before seeding `vendor_orig/`. Only after that authority is given, seed the exact baseline file into the matching `vendor_orig/` package path, sync the source into upgraded `vendor/`, apply the planned upgraded-side mutation, and regenerate `vendor.patch`. Treat this as a one-off fixture setup: name the exact paths, never overwrite an existing original-side file, and do not add this behaviour to the normal sync command.
 
 ## Guardrails and debugging
 

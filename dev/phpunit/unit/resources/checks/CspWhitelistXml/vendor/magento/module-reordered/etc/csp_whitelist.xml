@@ -1,0 +1,4 @@
+<csp_whitelist>
+    <policies><policy id="style-src"><values>
+        <value algorithm="sha256" type="hash" id="same">styles-hash</value>
+    </values></policy></policies></csp_whitelist>

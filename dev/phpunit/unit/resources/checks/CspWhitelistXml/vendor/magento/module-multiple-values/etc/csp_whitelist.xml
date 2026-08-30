@@ -1,0 +1,4 @@
+<csp_whitelist><policies><policy id="connect-src">
+<values><value id="stable" type="host">https://stable.example</value></values>
+<values><value id="second-block" type="host">https://after.example</value></values>
+</policy></policies></csp_whitelist>

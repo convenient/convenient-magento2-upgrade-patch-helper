@@ -1,7 +1,7 @@
 #!/bin/bash
-# Synchronise explicitly named source fixture files into an existing upgraded
-# Magento test instance. The pre-upgrade vendor_orig snapshot is deliberately
-# never touched.
+# Synchronise explicitly named existing or new source fixture files into an
+# existing upgraded Magento test instance. The pre-upgrade vendor_orig snapshot
+# is deliberately never touched.
 source /root/.bashrc
 set -euo pipefail
 set -f

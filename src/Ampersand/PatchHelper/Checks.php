@@ -12,6 +12,9 @@ class Checks
     public const TYPE_SYSTEM_CONFIG_ADDED = 'System config added';
     public const TYPE_SYSTEM_CONFIG_REMOVED = 'System config removed';
     public const TYPE_SYSTEM_CONFIG_CHANGED = 'System config changed';
+    public const TYPE_CSP_ADDED = 'CSP added';
+    public const TYPE_CSP_REMOVED = 'CSP removed';
+    public const TYPE_CSP_CHANGED = 'CSP changed';
     public const TYPE_PREFERENCE_REMOVED = 'Preference Removed';
     public const TYPE_PREFERENCE = 'Preference';
     public const TYPE_METHOD_PLUGIN = 'Plugin';
@@ -46,6 +49,9 @@ class Checks
         self::TYPE_SYSTEM_CONFIG_ADDED,
         self::TYPE_SYSTEM_CONFIG_REMOVED,
         self::TYPE_SYSTEM_CONFIG_CHANGED,
+        self::TYPE_CSP_ADDED,
+        self::TYPE_CSP_REMOVED,
+        self::TYPE_CSP_CHANGED,
         self::TYPE_SETUP_PATCH_DATA,
         self::TYPE_SETUP_PATCH_SCHEMA,
         self::TYPE_SETUP_SCRIPT,
