@@ -24,6 +24,7 @@ The report identifies upgrade impacts that may need review. Refer to [docs/CHECK
 For changes that interpret Magento behaviour—such as XML/config merging, DI, layouts, service/API contracts, schema/setup, indexing, or security policy—ground the implementation in Magento source before coding. This does not apply to generic helper or test infrastructure unless it encodes Magento behaviour.
 
 - Start with the local Magento 2.4.8 reference checkout at `dev/vanilla/vendor/magento/`. Use the relevant schema, reader/converter, service, interface, or other core implementation to establish valid input, effective identity and merge rules, meaningful attributes/text, and any normalisation Magento does or does not perform.
+- Distinguish source declaration identity, effective Magento configuration and the report label. Choose comparison semantics from the requested reporting contract and core evidence, not merely from existing helper code or fixtures.
 - Keep this helper's compact parsing and array-lookup approach. The reference establishes what the helper's map must mean; do not copy Magento runtime classes into the helper or require Magento bootstrapping for its unit tests.
 - Normal-behaviour fixtures should be valid against the relevant Magento contract where practical. Use malformed or unsupported inputs only in explicitly named error-path tests.
 - If `dev/vanilla` is absent or incomplete, stop before implementing Magento-semantic behaviour and ask the user to either run:
@@ -53,6 +54,12 @@ For changes that interpret Magento behaviour—such as XML/config merging, DI, l
 - Treat 2.4.8 as the default reference. Only when a relevant supported-version fixture fails, differs, or raises a concrete compatibility concern, inspect the matching already-running `uphelper-*` container's `vendor/magento/` source. Do not start, rebuild, or install a fixture merely for source inspection. Reconcile observed version differences so the helper supports the affected versions rather than silently choosing 2.4.8 behaviour.
 - In the final handoff for Magento-semantic work, name the local Magento source paths inspected and any container/version evidence used for a cross-version decision.
 
+## Check implementation and documentation
+
+Keep generic `src/Ampersand/PatchHelper/Patchfile/Entry.php` focused on patch-entry behaviour. Put substantial check-specific parsing and definition-building in named classes under `src/Ampersand/PatchHelper/Patchfile/Entry/`, following `SystemConfigDefinitions.php`, and have `Entry` delegate to them. These are collaborators, not PHP subclasses. Do not create a class for every trivial getter or refactor unrelated checks.
+
+Keep entries in `docs/CHECKS_AVAILABLE.md` concise: state what the check reports and the review action needed. Do not add parser mechanics, internal identities or test rationale unless users need them to interpret the report. For an existing check, update documentation only when user-visible interpretation changes.
+
 ## Local development and tests
 
 Run root checks with:
@@ -73,11 +80,11 @@ make docker-test ENV=m24nodb PHPUNIT_ARGS='--filter testNameGoesHere'
 
 The available environments and their Magento/PHP combinations are defined in `dev/Docker/docker-compose.yml`. CI runs static analysis and unit tests first, then runs the Docker functional matrix. Do not assume an individual functional environment represents every supported version pair.
 
-When running a command directly inside an already-running `uphelper-*` fixture, use Bash rather than `sh` and source `/root/.bashrc` first, as `dev/Docker/run-phpunit-functional-tests.sh` does. This initializes `phpenv` and makes the selected `php` executable available.
+When running an ad hoc command directly inside an already-running `uphelper-*` fixture, use `bash -c 'source /root/.bashrc; <command>'` rather than `sh` or varying between `bash -c` and `bash -lc`. This initializes `phpenv` and makes the selected `php` executable available. The existing test and sync scripts already source `/root/.bashrc` themselves.
 
 When a functional report golden-file assertion fails, inspect the failure-only artifact at `dev/phpunit/functional/actual_output/<expected-filename>.actual`. This directory is ignored by Git; use its complete report when updating golden files rather than PHPUnit's terminal diff.
 
-Prefer exercising new check behaviour through the existing broad functional reports for each fixture. Unit tests should cover the individual added, removed, changed, and edge-case semantics; do not add a focused functional method and golden for each of those cases when the broad report already covers the integration. Add a dedicated functional test only for a distinct command path or workflow that the existing suite does not exercise.
+For new or changed detection behaviour, add focused unit coverage and add or update representative before/after files in the existing `dev/Test*/` module fixtures. Update `dev/Docker/setup-magento-with-diff.sh` to reproduce the intended upgraded-side mutation after `vendor_orig` is frozen. Exercise these fixtures through the existing broad functional suites and report goldens, including `--show-info` output for INFO findings. Do not add a focused functional method and golden for each added, removed or changed case. Add a dedicated functional test only for a distinct command path or workflow that the existing suite does not exercise.
 
 Prefer DAMP unit tests: keep scenario setup and expected outcomes visible in each test, sharing only incidental mechanics. Retain distinct regression and safety cases, but avoid duplicate fixtures that exercise the same behaviour.
 
@@ -89,7 +96,15 @@ make -C dev docker-sync-fixtures ENV=m24 SYNC_PATHS='dev/TestVendorModule/src/mo
 
 The helper maps only explicitly named paths under direct `dev/Test*/` fixtures, preserves the immutable `vendor_orig/` snapshot, clears filesystem-generated/cache directories, and regenerates `vendor.patch`. `SYNC_PATHS` can add a new source file to the upgraded tree as well as update an existing one; it never creates an original-side counterpart. Do not symlink test package sources into both vendor trees: shared files would invalidate the frozen before/after comparison and can overwrite deliberate upgraded-side fixture mutations. New packages/modules, Composer or registration changes, module enablement, and rebuilds require explicit human authorisation. Never start, stop, install, or rebuild Docker/Magento fixtures unless the user asks.
 
-If a new file must be validated as a **changed** entry in an already-running fixture, explain that normal `SYNC_PATHS` creates an addition because it writes upgraded `vendor/` only, then ask the user for explicit authority before seeding `vendor_orig/`. Only after that authority is given, seed the exact baseline file into the matching `vendor_orig/` package path, sync the source into upgraded `vendor/`, apply the planned upgraded-side mutation, and regenerate `vendor.patch`. Treat this as a one-off fixture setup: name the exact paths, never overwrite an existing original-side file, and do not add this behaviour to the normal sync command.
+Before syncing, inspect fixture setup for deliberate upgraded-side mutations of the same files: source sync replaces those mutations. Preserve the intended before/after scenario. A new INFO finding can change default-report counts even when `--show-info` is absent; justify changed rows and counts before updating a golden.
+
+If a new file must be validated as a **changed** entry in an already-running fixture, explain that normal `SYNC_PATHS` creates an addition because it writes upgraded `vendor/` only. Obtain explicit authority before seeding `vendor_orig/` unless that exact operation is already authorised. Only after that authority is given, seed the exact baseline file into the matching `vendor_orig/` package path, sync the source into upgraded `vendor/`, apply the planned upgraded-side mutation, and regenerate `vendor.patch`. Treat this as a one-off fixture setup: name the exact paths, never overwrite an existing original-side file, and do not add this behaviour to the normal sync command.
+
+### Task authorisation and execution permissions
+
+For requested check implementation, relevant local tests, inspection and targeted fixture sync are normal validation steps. Check `docker ps` before using fixtures and run functional suites serially. Honour the user's named environments and test limits; do not expand an explicitly focused run into a full matrix. If the exact operation or seeding sequence is already authorised, do not ask conversationally again for each step. Report inactive or stale fixtures as validation gaps rather than starting or rebuilding them.
+
+Task authorisation is separate from the agent tool's execution permissions. Reuse matching approvals where supported, but keep arbitrary container commands, exceptional baseline seeding and lifecycle operations separately approved. A changed command, test filter or sync target may require a new execution approval. Never weaken execution safeguards or route commands through another allowed command to avoid that review. An approved script remains trusted executable code, not a new sandbox.
 
 ## Guardrails and debugging
 

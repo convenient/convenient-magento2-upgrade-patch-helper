@@ -1,0 +1,3 @@
+interface:
+  display_name: "Edit upgrade check"
+  short_description: "Fix existing checks with focused regression coverage"
