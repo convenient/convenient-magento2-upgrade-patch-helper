@@ -20,24 +20,6 @@ class FunctionalTests extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * @group v22
-     */
-    public function testMagentoTwoTwo()
-    {
-        $this->assertFileExists(BASE_DIR . '/dev/instances/magentom22/app/etc/env.php', "Magento 2.2 is not installed");
-
-        exec($this->generateAnalyseCommand('/dev/instances/magentom22', '--pad-table-columns 130 --sort-by-type --vendor-namespaces Ampersand'), $output, $return);
-        $this->assertEquals(0, $return, "The return code of the command was not zero");
-
-        $lastLine = array_pop($output);
-        $this->assertStringStartsWith('You should review the above', $lastLine);
-
-        $output = implode(PHP_EOL, $output);
-
-        $this->assertReportOutput('/dev/phpunit/functional/expected_output/magentom22.out.txt', $output);
-    }
-
-    /**
      * @link https://github.com/AmpersandHQ/ampersand-magento2-upgrade-patch-helper/issues/9
      * @depends testMagentoTwoFourNoDb
      * @group v24nodb
@@ -245,6 +227,32 @@ class FunctionalTests extends \PHPUnit\Framework\TestCase
         // We should get the same output regardless of whether we are connected to a DB or not
         $this->assertReportOutput(
             '/dev/phpunit/functional/expected_output/magentom2451-nodb.out.txt',
+            $output
+        );
+    }
+
+    /**
+     * @group v24nodbnohyva
+     */
+    public function testMagentoTwoFourNoDbWithoutHyva()
+    {
+        $instancePath = BASE_DIR . '/dev/instances/magentom24nodbnohyva';
+        $this->assertFileExists($instancePath . '/app/etc/di.xml', "Magento 2.4 directory is wrong");
+        $this->assertFileDoesNotExist($instancePath . '/app/etc/env.php', "Magento 2.4 is installed when it shouldnt be");
+        $this->assertDirectoryDoesNotExist($instancePath . '/vendor/hyva-themes', "Hyva is installed when it shouldnt be");
+
+        exec($this->generateAnalyseCommand('/dev/instances/../instances/magentom24nodbnohyva', '--pad-table-columns 130 --sort-by-type --vendor-namespaces Ampersand'), $output, $return);
+        $this->assertEquals(0, $return, "The return code of the command was not zero");
+
+        $lastLine = array_pop($output);
+        $this->assertStringStartsWith('You should review the above', $lastLine);
+
+        $output = implode(PHP_EOL, array_filter($output, function ($line) {
+            return !preg_match('/^(INFO|IGNORE) count:/', $line);
+        }));
+
+        $this->assertReportOutput(
+            '/dev/phpunit/functional/expected_output/magentom24-nodb-nohyva.out.txt',
             $output
         );
     }

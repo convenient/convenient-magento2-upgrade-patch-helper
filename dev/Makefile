@@ -24,16 +24,18 @@ docker-sync-fixtures: # Sync named existing or new fixture files into an already
 
 docker-stop-all-containers:     # Stop all upgrade helper docker containers
 	docker container stop uphelper-m24nodb || true
+	docker container stop uphelper-m24nodbnohyva || true
+	docker container stop uphelper-m2451nodb || true
 	docker container stop uphelper-m24 || true
 	docker container stop uphelper-m23 || true
-	docker container stop uphelper-m22 || true
 	docker container stop uphelper-mysql57 || true
 	docker container stop uphelper-elasticsearch || true
 	docker container stop uphelper-elasticsearch8 || true
 	docker container rm uphelper-m24nodb || true
+	docker container rm uphelper-m24nodbnohyva || true
+	docker container rm uphelper-m2451nodb || true
 	docker container rm uphelper-m24 || true
 	docker container rm uphelper-m23 || true
-	docker container rm uphelper-m22 || true
 	docker container rm uphelper-mysql57 || true
 	docker container rm uphelper-elasticsearch || true
 	docker container rm uphelper-elasticsearch8 || true

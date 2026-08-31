@@ -39,7 +39,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        test_group: [m23, m24, m24nodb, m2451nodb]
+        test_group: [m23, m24, m24nodb, m2451nodb, m24nodbnohyva]
 
     env:
       TEST_GROUP: ${{ matrix.test_group }}

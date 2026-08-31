@@ -7,9 +7,9 @@ cd /src/dev
 export COMPOSER_MEMORY_LIMIT=-1
 
 # disable xdebug for performance
-for ini in `ls  /root/.phpenv/versions/*/etc/conf.d/xdebug.ini`; do
+for ini in /root/.phpenv/versions/*/etc/conf.d/xdebug.ini; do
   if [ -f "$ini" ]; then
-  mv "$ini" "$ini.bak"
+    mv "$ini" "$ini.bak"
   fi
 done
 
@@ -56,41 +56,42 @@ composer2 config --json audit.block-insecure false # to allow install of older v
 # https://github.com/composer/composer/issues/12623#issuecomment-3551953185
 composer config --unset repositories || true
 composer2 config --unset repo.0
-composer2 config repositories.ampersandtesthyvaextended '{"type": "path", "url": "./../../TestHyvaExtendedTheme/", "options": {"symlink":false}}'
-composer2 config repositories.ampersandtesthyvastub '{"type": "path", "url": "./../../TestHyvaThemeStub/", "options": {"symlink":false}}'
-composer2 config repositories.ampersandtesthyvafallback '{"type": "path", "url": "./../../TestHyvaFallbackTheme/", "options": {"symlink":false}}'
 composer2 config repositories.ampersandtestmodule '{"type": "path", "url": "./../../TestVendorModule/", "options": {"symlink":false}}'
 composer2 config repositories.ampersandtestmoduletoberemoved '{"type": "path", "url": "./../../TestVendorModuleToBeRemoved/", "options": {"symlink":false}}'
 composer2 config repositories.testamastygdprcookie '{"type": "path", "url": "./../../TestAmastyGdprCookie/", "options": {"symlink":false}}'
-composer2 config repositories.testamastygdprcookiehyva '{"type": "path", "url": "./../../TestAmastyGdprCookieHyva/", "options": {"symlink":false}}'
-composer2 config repositories.hyva-themes/magento2-theme-module git https://github.com/hyva-themes/magento2-theme-module.git
-composer2 config repositories.hyva-themes/magento2-default-theme git https://github.com/hyva-themes/magento2-default-theme.git
-composer2 config repositories.hyva-themes/magento2-default-theme-csp git https://github.com/hyva-themes/magento2-default-theme-csp.git
-composer2 config repositories.hyva-themes/magento2-base-layout-reset git https://github.com/hyva-themes/magento2-base-layout-reset.git
-composer2 config repositories.hyva-themes/magento2-compat-module-fallback git https://github.com/hyva-themes/magento2-compat-module-fallback.git
-composer2 config repositories.hyva-themes/magento2-luma-checkout git https://github.com/hyva-themes/magento2-luma-checkout.git
-composer2 config repositories.hyva-themes/magento2-theme-fallback git https://github.com/hyva-themes/magento2-theme-fallback.git
-composer2 config repositories.hyva-themes/magento2-order-cancellation-webapi git https://github.com/hyva-themes/magento2-order-cancellation-webapi.git
-composer2 config repositories.hyva-themes/magento2-email-module git https://github.com/hyva-themes/magento2-email-module.git
 composer2 config repo.foomanmirror composer https://repo-magento-mirror.fooman.co.nz/
 composer2 config minimum-stability dev
 composer2 config prefer-stable true
-composer2 require ampersand/upgrade-patch-helper-test-hyva-fallback-theme:"*" --no-update
-composer2 require ampersand/upgrade-patch-helper-test-hyva-theme-stub:"*" --no-update
-composer2 require ampersand/upgrade-patch-helper-test-hyva-theme-extended:"*" --no-update
 composer2 require ampersand/upgrade-patch-helper-test-module:"*" --no-update
 composer2 require ampersand/upgrade-patch-helper-test-module-to-be-removed:"*" --no-update
-# Exclude the bundled payment integration; retain the real Hyva theme/fallback code.
-php -r '
-    $composer = json_decode(file_get_contents("composer.json"), true);
-    $composer["replace"]["hyva-themes/magento2-mollie-theme-bundle"] = "*";
-    file_put_contents("composer.json", json_encode($composer, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) . PHP_EOL);
-'
-# Composer selects theme and fallback versions compatible with the fixture.
-composer2 require amasty/gdpr-cookie:"*" amasty/module-gdpr-cookie-hyva:"*" hyva-themes/magento2-default-theme:"*" hyva-themes/magento2-compat-module-fallback:"*" hyva-themes/magento2-theme-fallback:"*" --no-update
-if [[ "$MAGE_TO" == 2.3* ]]; then
-  composer2 config repositories.hyva-themes/magento2-reset-theme '{"type": "path", "url": "./../../TestHyvaResetTheme/", "options": {"symlink":false}}'
-  composer2 require hyva-themes/magento2-default-theme:1.3.10 hyva-themes/magento2-theme-module:1.3.10 --no-update
+composer2 require amasty/gdpr-cookie:"*" --no-update
+if [[ "${WITH_HYVA:-1}" == "1" ]]; then
+  composer2 config repositories.ampersandtesthyvaextended '{"type": "path", "url": "./../../TestHyvaExtendedTheme/", "options": {"symlink":false}}'
+  composer2 config repositories.ampersandtesthyvastub '{"type": "path", "url": "./../../TestHyvaThemeStub/", "options": {"symlink":false}}'
+  composer2 config repositories.ampersandtesthyvafallback '{"type": "path", "url": "./../../TestHyvaFallbackTheme/", "options": {"symlink":false}}'
+  composer2 config repositories.testamastygdprcookiehyva '{"type": "path", "url": "./../../TestAmastyGdprCookieHyva/", "options": {"symlink":false}}'
+  composer2 config repositories.hyva-themes/magento2-theme-module git https://github.com/hyva-themes/magento2-theme-module.git
+  composer2 config repositories.hyva-themes/magento2-default-theme git https://github.com/hyva-themes/magento2-default-theme.git
+  composer2 config repositories.hyva-themes/magento2-default-theme-csp git https://github.com/hyva-themes/magento2-default-theme-csp.git
+  composer2 config repositories.hyva-themes/magento2-base-layout-reset git https://github.com/hyva-themes/magento2-base-layout-reset.git
+  composer2 config repositories.hyva-themes/magento2-compat-module-fallback git https://github.com/hyva-themes/magento2-compat-module-fallback.git
+  composer2 config repositories.hyva-themes/magento2-luma-checkout git https://github.com/hyva-themes/magento2-luma-checkout.git
+  composer2 config repositories.hyva-themes/magento2-theme-fallback git https://github.com/hyva-themes/magento2-theme-fallback.git
+  composer2 config repositories.hyva-themes/magento2-order-cancellation-webapi git https://github.com/hyva-themes/magento2-order-cancellation-webapi.git
+  composer2 config repositories.hyva-themes/magento2-email-module git https://github.com/hyva-themes/magento2-email-module.git
+  composer2 require ampersand/upgrade-patch-helper-test-hyva-fallback-theme:"*" ampersand/upgrade-patch-helper-test-hyva-theme-stub:"*" ampersand/upgrade-patch-helper-test-hyva-theme-extended:"*" --no-update
+  # Exclude the bundled payment integration; retain the real Hyva theme/fallback code.
+  php -r '
+      $composer = json_decode(file_get_contents("composer.json"), true);
+      $composer["replace"]["hyva-themes/magento2-mollie-theme-bundle"] = "*";
+      file_put_contents("composer.json", json_encode($composer, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) . PHP_EOL);
+  '
+  # Composer selects theme and fallback versions compatible with the fixture.
+  composer2 require amasty/module-gdpr-cookie-hyva:"*" hyva-themes/magento2-default-theme:"*" hyva-themes/magento2-compat-module-fallback:"*" hyva-themes/magento2-theme-fallback:"*" --no-update
+  if [[ "$MAGE_TO" == 2.3* ]]; then
+    composer2 config repositories.hyva-themes/magento2-reset-theme '{"type": "path", "url": "./../../TestHyvaResetTheme/", "options": {"symlink":false}}'
+    composer2 require hyva-themes/magento2-default-theme:1.3.10 hyva-themes/magento2-theme-module:1.3.10 --no-update
+  fi
 fi
 for devpackage in $(composer2 show -s | sed -n '/requires (dev)$/,/^$/p' | grep -v 'requires (dev)' | cut -d ' ' -f1); do
   echo "composer2 remove --dev $devpackage --no-update"
@@ -118,9 +119,11 @@ composer2 update --with-all-dependencies --no-interaction
 composer2 install --no-interaction --ignore-platform-reqs
 # Spoof some changes into our "third party" test module so they appear in the diff
 sed -i 's/<script type="text\/x-magento-init">/<script data-cfasync="false" type="text\/x-magento-init">/' vendor/amasty/gdpr-cookie/view/frontend/templates/widget/settings.phtml # issue 130
-sed -i 's/data-cookie-settings="before"/data-cookie-settings="after"/' vendor/amasty/module-gdpr-cookie-hyva/view/frontend/templates/widget/settings.phtml # issue 130
-echo "<span/>"  >> vendor/ampersand/upgrade-patch-helper-test-hyva-fallback-theme/theme/Magento_Customer/templates/account/dashboard/info.phtml
-echo "<span/>"  >> vendor/ampersand/upgrade-patch-helper-test-hyva-theme-stub/theme/Magento_Checkout/templates/cart/form.phtml
+if [[ "${WITH_HYVA:-1}" == "1" ]]; then
+  sed -i 's/data-cookie-settings="before"/data-cookie-settings="after"/' vendor/amasty/module-gdpr-cookie-hyva/view/frontend/templates/widget/settings.phtml # issue 130
+  echo "<span/>"  >> vendor/ampersand/upgrade-patch-helper-test-hyva-fallback-theme/theme/Magento_Customer/templates/account/dashboard/info.phtml
+  echo "<span/>"  >> vendor/ampersand/upgrade-patch-helper-test-hyva-theme-stub/theme/Magento_Checkout/templates/cart/form.phtml
+fi
 echo "<span/>"  >> vendor/ampersand/upgrade-patch-helper-test-module/src/module/view/frontend/templates/checkout/something.phtml
 echo "<span/>"  >> vendor/ampersand/upgrade-patch-helper-test-module/src/theme/Magento_Checkout/templates/cart/form.phtml # ensure that third party theme modifications show as expected
 rm vendor/ampersand/upgrade-patch-helper-test-module/src/module/Model/ToPreferenceAndDelete.php
@@ -155,13 +158,17 @@ echo "<!-- --><p>some change</p>"  >> vendor/magento/module-ui/view/base/web/tem
 echo " "  >> vendor/ampersand/upgrade-patch-helper-test-module/src/theme/Magento_Ui/web/templates/redundant.html
 echo " "  >> vendor/ampersand/upgrade-patch-helper-test-module/src/module/view/frontend/email/redundant.html
 echo " "  >> vendor/ampersand/upgrade-patch-helper-test-module/src/theme/Magento_Checkout/web/js/redundant.js
-echo " "  >> vendor/ampersand/upgrade-patch-helper-test-hyva-theme-stub/theme/Magento_Checkout/templates/cart/redundant.phtml
+if [[ "${WITH_HYVA:-1}" == "1" ]]; then
+  echo " "  >> vendor/ampersand/upgrade-patch-helper-test-hyva-theme-stub/theme/Magento_Checkout/templates/cart/redundant.phtml
+fi
 
 # Ignored change
 echo "<!-- -->"  >> vendor/ampersand/upgrade-patch-helper-test-module/src/theme/Magento_Ui/web/templates/ignore.html
 echo "<!-- -->"  >> vendor/ampersand/upgrade-patch-helper-test-module/src/module/view/frontend/email/ignore.html
 echo "/* some comment */"  >> vendor/ampersand/upgrade-patch-helper-test-module/src/theme/Magento_Checkout/web/js/ignore.js
-echo "<!-- -->"  >> vendor/ampersand/upgrade-patch-helper-test-hyva-theme-stub/theme/Magento_Checkout/templates/cart/ignored.phtml
+if [[ "${WITH_HYVA:-1}" == "1" ]]; then
+  echo "<!-- -->"  >> vendor/ampersand/upgrade-patch-helper-test-hyva-theme-stub/theme/Magento_Checkout/templates/cart/ignored.phtml
+fi
 
 echo "#"  >> vendor/magento/module-customer/view/frontend/web/js/model/authentication-popup.js
 
@@ -175,7 +182,9 @@ echo "Installing test module"
 cd -
 cp -r TestModule/app/code ./instances/magento$ID/app/
 cp -r TestModule/app/design/frontend/Ampersand ./instances/magento$ID/app/design/frontend/
-cp -r TestModule/app/design/frontend/Vendor ./instances/magento$ID/app/design/frontend/
+if [[ "${WITH_HYVA:-1}" == "1" ]]; then
+  cp -r TestModule/app/design/frontend/Vendor ./instances/magento$ID/app/design/frontend/
+fi
 cd -
 if [ "$NODB" == "1" ]; then
   php bin/magento module:enable --all
@@ -221,9 +230,11 @@ if [ "$NODB" == "0" ]; then
   # This helps replicate a bug in which the tool exits with a 0 and no output
   php bin/magento config:set web/url/redirect_to_base 0
 
-  # Hyva fallback theme configuration
-  mysql -uroot -h$HOSTNAME --port=9999 "testmagento$ID" -e "insert into core_config_data(path, value) values ('hyva_theme_fallback/general/enable', '1');";
-  mysql -uroot -h$HOSTNAME --port=9999 "testmagento$ID" -e "insert into core_config_data(path, value) values ('hyva_theme_fallback/general/theme_full_path', 'frontend/HyvaFallback/theme');";
+  if [[ "${WITH_HYVA:-1}" == "1" ]]; then
+    # Hyva fallback theme configuration
+    mysql -uroot -h$HOSTNAME --port=9999 "testmagento$ID" -e "insert into core_config_data(path, value) values ('hyva_theme_fallback/general/enable', '1');";
+    mysql -uroot -h$HOSTNAME --port=9999 "testmagento$ID" -e "insert into core_config_data(path, value) values ('hyva_theme_fallback/general/theme_full_path', 'frontend/HyvaFallback/theme');";
+  fi
 
   php bin/magento cache:flush
 fi
