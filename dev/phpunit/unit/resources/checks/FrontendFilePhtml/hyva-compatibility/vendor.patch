@@ -1,0 +1,22 @@
+diff -ur -N vendor_orig/amasty/gdpr-cookie/view/frontend/templates/widget/settings.phtml vendor/amasty/gdpr-cookie/view/frontend/templates/widget/settings.phtml
+--- vendor_orig/amasty/gdpr-cookie/view/frontend/templates/widget/settings.phtml
++++ vendor/amasty/gdpr-cookie/view/frontend/templates/widget/settings.phtml
+@@ -2,6 +2,6 @@
+ // Synthetic issue 130 fixture, not an Amasty template.
+ ?>
+ <div data-role="gdpr-cookie-widget-container">Base cookie settings</div>
+-<script type="text/x-magento-init">
++<script data-cfasync="false" type="text/x-magento-init">
+     {"[data-role=gdpr-cookie-widget-container]": {"Magento_Ui/js/core/app": {}}}
+ </script>
+diff -ur -N vendor_orig/amasty/module-gdpr-cookie-hyva/view/frontend/templates/widget/settings.phtml vendor/amasty/module-gdpr-cookie-hyva/view/frontend/templates/widget/settings.phtml
+--- vendor_orig/amasty/module-gdpr-cookie-hyva/view/frontend/templates/widget/settings.phtml
++++ vendor/amasty/module-gdpr-cookie-hyva/view/frontend/templates/widget/settings.phtml
+@@ -1,6 +1,6 @@
+ <?php
+ // Synthetic issue 130 fixture, not an Amasty template.
+ ?>
+-<section x-data="{ open: false }" data-cookie-settings="before">
++<section x-data="{ open: false }" data-cookie-settings="after">
+     <button type="button" @click="open = !open">Hyva cookie settings</button>
+ </section>

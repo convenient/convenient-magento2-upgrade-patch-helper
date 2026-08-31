@@ -1,0 +1,13 @@
+{
+    "name": "amasty/module-gdpr-cookie-hyva",
+    "description": "Synthetic issue 130 fixture; not the commercial Amasty package",
+    "type": "magento2-module",
+    "version": "2.4.0",
+    "require": {
+        "amasty/gdpr-cookie": "*",
+        "hyva-themes/magento2-compat-module-fallback": "*"
+    },
+    "autoload": {
+        "files": ["registration.php"]
+    }
+}

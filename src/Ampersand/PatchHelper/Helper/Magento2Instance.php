@@ -209,7 +209,11 @@ class Magento2Instance
         try {
             $themeFallbackPaths = [];
             $scopeConfig = $this->objectManager->get(ScopeConfigInterface::class);
-            foreach ($this->objectManager->get(StoreManagerInterface::class)->getStores() as $store) {
+            $stores = $this->objectManager->get(StoreManagerInterface::class)->getStores();
+            if (empty($stores)) {
+                throw new \RuntimeException('Store configuration is unavailable');
+            }
+            foreach ($stores as $store) {
                 if (!$scopeConfig->isSetFlag('hyva_theme_fallback/general/enable', 'store', $store->getCode())) {
                     continue;
                 }
@@ -241,7 +245,7 @@ class Magento2Instance
                     return false;
                 }
             );
-            unset($theme, $store, $scopeConfig, $themeFallbackPaths);
+            unset($theme, $store, $stores, $scopeConfig, $themeFallbackPaths);
         }
 
         /*

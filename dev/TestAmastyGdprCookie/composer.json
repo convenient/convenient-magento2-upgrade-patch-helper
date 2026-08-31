@@ -1,0 +1,9 @@
+{
+    "name": "amasty/gdpr-cookie",
+    "description": "Synthetic issue 130 fixture; not the commercial Amasty package",
+    "type": "magento2-module",
+    "version": "2.12.1",
+    "autoload": {
+        "files": ["registration.php"]
+    }
+}
