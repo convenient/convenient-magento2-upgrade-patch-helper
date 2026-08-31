@@ -3,6 +3,10 @@
 namespace Ampersand\PatchHelper\Patchfile;
 
 use Ampersand\PatchHelper\Exception\PluginDetectionException;
+use Ampersand\PatchHelper\Patchfile\Entry\ContentSecurityDefinitions;
+use Ampersand\PatchHelper\Patchfile\Entry\DatabaseTableDefinitions;
+use Ampersand\PatchHelper\Patchfile\Entry\InterceptablePhpFunctions;
+use Ampersand\PatchHelper\Patchfile\Entry\QueueConsumers;
 use Ampersand\PatchHelper\Patchfile\Entry\SystemConfigDefinitions;
 use Symfony\Component\Console\Output\OutputInterface as Output;
 
@@ -25,6 +29,12 @@ class Entry
 
     /** @var SystemConfigDefinitions|null */
     private $systemConfigParser;
+
+    /** @var DatabaseTableDefinitions|null */
+    private $databaseTableDefinitions;
+
+    /** @var ContentSecurityDefinitions|null */
+    private $contentSecurityDefinitions;
 
     /**
      * @var string[]
@@ -274,102 +284,13 @@ class Entry
             // These have specific handling within ClassPlugin.php
             return [];
         }
-        $newFileContents = $this->getFileContents($this->newFilePath);
-        $originalFileContents = $this->getFileContents($this->originalFilePath);
-
-        $hunks = $this->getHunks();
-        $modifiedLines = $this->getModifiedLines($hunks);
-
-        $affectedFunctions = [];
-
-        foreach ($modifiedLines['new'] as $lineNumber => $expectedLine) {
-            $affectedFunctions[] = $this->getAffectedFunction($lineNumber, $newFileContents, $expectedLine);
-        }
-
-        foreach ($modifiedLines['original'] as $lineNumber => $expectedLine) {
-            $affectedFunctions[] = $this->getAffectedFunction($lineNumber, $originalFileContents, $expectedLine);
-        }
-
-        // Go through the list and collect valid public function
-        $this->affectedPhpFunctions = [];
-        foreach (array_unique(array_filter($affectedFunctions)) as $affectedFunction) {
-            $affectedFunction = substr($affectedFunction, 0, strpos($affectedFunction, '('));
-
-            // Explode on function so we end with an array of visibility and function name"
-            $affectedFunction = explode('function', $affectedFunction);
-
-            if (isset($affectedFunction[0]) && isset($affectedFunction[1])) {
-                $visibility = trim($affectedFunction[0]);
-                $name = trim($affectedFunction[1]);
-                if (in_array($visibility, ['public'])) {
-                    $this->affectedPhpFunctions[strtolower($name)] = $name;
-                }
-            }
-        }
-
+        $this->affectedPhpFunctions = (new InterceptablePhpFunctions(
+            $this->newFilePath,
+            $this->getFileContents($this->newFilePath),
+            $this->getFileContents($this->originalFilePath),
+            $this->getModifiedLines($this->getHunks())
+        ))->getFunctions();
         return $this->affectedPhpFunctions;
-    }
-
-    /**
-     * @param int $lineNumber
-     * @param string[] $fileContents
-     * @param string $expectedLineContents
-     * @return bool|string
-     * @throws PluginDetectionException
-     */
-    private function getAffectedFunction(int $lineNumber, array $fileContents, string $expectedLineContents)
-    {
-        // minus one for the array index starting at zero
-        $actualLine = $fileContents[$lineNumber - 1];
-
-        if (strcmp($expectedLineContents, $actualLine) !== 0) {
-            throw new PluginDetectionException(
-                "$this->newFilePath - on line $lineNumber - $expectedLineContents does not equal $actualLine"
-            );
-        }
-
-        return $this->scanAboveForFunctionDeclaration($fileContents, $lineNumber - 1);
-    }
-
-    /**
-     * @param string[] $fileContents
-     * @param int $lineNumber
-     * @return bool|string
-     */
-    private function scanAboveForFunctionDeclaration(array $fileContents, int $lineNumber)
-    {
-        $line = trim($fileContents[$lineNumber]);
-
-        $phpLinesToSkip = [
-            'use',
-            '#',
-            '//',
-            '/*',
-            '/**',
-            '*',
-            '*/',
-        ];
-
-        foreach ($phpLinesToSkip as $lineToSkip) {
-            if (str_starts_with($line, $lineToSkip)) {
-                return false;
-            }
-        }
-
-        for ($i = $lineNumber; $i >= 0; $i--) {
-            $potentialFunctionDeclaration = trim($fileContents[$i]);
-            if (str_contains($potentialFunctionDeclaration, 'function')) {
-                foreach ($phpLinesToSkip as $lineToSkip) {
-                    // This is not a real function declaration, it is a skipped line
-                    if (str_starts_with($potentialFunctionDeclaration, $lineToSkip)) {
-                        continue 2;
-                    }
-                }
-                return $potentialFunctionDeclaration;
-            }
-        }
-
-        return false;
     }
 
     /**
@@ -436,24 +357,10 @@ class Entry
     private function getAddedOrRemovedQueueConsumers(string $modifiedLineType = 'new')
     {
         if (pathinfo($this->newFilePath, PATHINFO_BASENAME) !== 'queue_consumer.xml') {
-            // try to get added consumers on a wrong filename
             return [];
         }
-
-        $hunks = $this->getHunks();
-        $modifiedLines = $this->getModifiedLines($hunks);
-
-        $addedConsumers = [];
-
-        foreach ($modifiedLines[$modifiedLineType] as $lineNumber => $expectedLine) {
-            if (str_contains($expectedLine, '<consumer')) {
-                if (preg_match('/name="([^"]*)"/', $expectedLine, $matches)) {
-                    $addedConsumers[] = $matches[1];
-                }
-            }
-        }
-
-        return $addedConsumers;
+        return (new QueueConsumers($this->getModifiedLines($this->getHunks())))
+            ->getConsumers($modifiedLineType);
     }
 
     /**
@@ -481,7 +388,7 @@ class Entry
      */
     public function getDatabaseTablesDefinitionsFromOriginalFile()
     {
-        return $this->getDatabaseTablesDefinitionsFromFile($this->originalFilePath);
+        return $this->getDatabaseTableDefinitions()->getDefinitions($this->originalFilePath);
     }
 
     /**
@@ -489,45 +396,13 @@ class Entry
      */
     public function getDatabaseTablesDefinitionsFromNewFile()
     {
-        return $this->getDatabaseTablesDefinitionsFromFile($this->newFilePath);
+        return $this->getDatabaseTableDefinitions()->getDefinitions($this->newFilePath);
     }
 
     /**
      * @param string $file
      * @return array<string, array<string, mixed>>
      */
-    private function getDatabaseTablesDefinitionsFromFile(string $file)
-    {
-        if (pathinfo($file, PATHINFO_BASENAME) !== 'db_schema.xml') {
-            return []; // try to get database schema info from wrong file
-        }
-
-        $filepath = realpath($this->directory . DIRECTORY_SEPARATOR . $file);
-        if (!is_file($filepath)) {
-            return []; // File did not exist no schema present
-        }
-
-        $xml = simplexml_load_file($filepath);
-        $schemaData = json_decode(json_encode((array)$xml), true);
-
-        $tables = [];
-        //Sort to filter out any reorganisation of the tables xml data being flagged
-        recur_ksort($schemaData['table']);
-
-        $tablesToProcess = $schemaData['table'];
-        if (isset($schemaData['table']['@attributes'])) {
-            // When only one table is present in the xml it's not an array, it's the top level
-            $tablesToProcess = [$schemaData['table']];
-        }
-
-        foreach ($tablesToProcess as $tableDefinition) {
-            $tables[$tableDefinition['@attributes']['name']] = $tableDefinition;
-            // Store a hash of the table definition for easy comparison
-            $tables[$tableDefinition['@attributes']['name']]['amp_upgrade_hash'] = md5(serialize($tableDefinition));
-        }
-        return $tables;
-    }
-
     /**
      * @return array<string, string>
      */
@@ -564,7 +439,7 @@ class Entry
      */
     public function getContentSecurityDefinitionsFromOriginalFile()
     {
-        return $this->getContentSecurityDefinitionsFromFile($this->originalFilePath);
+        return $this->getContentSecurityDefinitionParser()->getDefinitions($this->originalFilePath);
     }
 
     /**
@@ -572,84 +447,29 @@ class Entry
      */
     public function getContentSecurityDefinitionsFromNewFile()
     {
-        return $this->getContentSecurityDefinitionsFromFile($this->newFilePath);
+        return $this->getContentSecurityDefinitionParser()->getDefinitions($this->newFilePath);
     }
 
     /**
-     * @param string $file
-     * @return array<string, array{label: string, value: string}>
+     * @return DatabaseTableDefinitions
      */
-    private function getContentSecurityDefinitionsFromFile(string $file)
+    private function getDatabaseTableDefinitions()
     {
-        if (pathinfo($file, PATHINFO_BASENAME) !== 'csp_whitelist.xml') {
-            return [];
+        if ($this->databaseTableDefinitions === null) {
+            $this->databaseTableDefinitions = new DatabaseTableDefinitions($this->directory);
         }
+        return $this->databaseTableDefinitions;
+    }
 
-        $filepath = realpath($this->directory . DIRECTORY_SEPARATOR . $file);
-        if (!is_file($filepath)) {
-            return [];
+    /**
+     * @return ContentSecurityDefinitions
+     */
+    private function getContentSecurityDefinitionParser()
+    {
+        if ($this->contentSecurityDefinitions === null) {
+            $this->contentSecurityDefinitions = new ContentSecurityDefinitions($this->directory);
         }
-
-        $previousUseInternalErrors = libxml_use_internal_errors(true);
-        try {
-            libxml_clear_errors();
-            $xml = simplexml_load_file($filepath);
-            if ($xml === false) {
-                $message = 'Unable to parse XML';
-                $errorMessages = [];
-                foreach (libxml_get_errors() as $error) {
-                    $errorMessages[] = sprintf(
-                        ' at line %d, column %d: %s',
-                        $error->line,
-                        $error->column,
-                        trim($error->message)
-                    );
-                }
-                if ($errorMessages !== []) {
-                    $message .= implode(';', $errorMessages);
-                }
-                throw new \InvalidArgumentException($message);
-            }
-
-            $definitions = [];
-            foreach ($xml->policies->policy as $policy) {
-                $policyId = (string)$policy['id'];
-                if ($policyId === '') {
-                    continue;
-                }
-
-                foreach ($policy->values as $values) {
-                    foreach ($values->value as $value) {
-                        $valueId = (string)$value['id'];
-                        if ($valueId === '') {
-                            continue;
-                        }
-
-                        $declaration = $policyId . '/' . $valueId;
-                        $type = (string)$value['type'];
-                        $valueText = (string)$value;
-                        if ($type === 'host') {
-                            $identity = serialize([$policyId, 'host', $valueId]);
-                            $effectiveValue = $valueText;
-                        } else {
-                            $identity = serialize([$policyId, 'hash', $valueText]);
-                            $effectiveValue = (string)$value['algorithm'];
-                        }
-
-                        $definitions[$identity] = [
-                            'label' => $declaration,
-                            'value' => $effectiveValue
-                        ];
-                    }
-                }
-            }
-        } finally {
-            libxml_clear_errors();
-            libxml_use_internal_errors($previousUseInternalErrors);
-        }
-
-        ksort($definitions);
-        return $definitions;
+        return $this->contentSecurityDefinitions;
     }
 
     /**
