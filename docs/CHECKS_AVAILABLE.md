@@ -290,7 +290,7 @@ Often no action is needed, this is just information that something in the defini
 
 ## INFO - System config added
 
-An `etc/adminhtml/system.xml` file has had configuration paths added.
+An `etc/adminhtml/system.xml` file or referenced system fragment has had configuration paths added.
 
 ```
 +-------+---------------------+--------------------------------------------------------+--------------------------+
@@ -304,7 +304,7 @@ Review deployment configuration, custom code, and integrations that may need to 
 
 ## INFO - System config removed
 
-An `etc/adminhtml/system.xml` file has had configuration paths removed.
+An `etc/adminhtml/system.xml` file or referenced system fragment has had configuration paths removed.
 
 ```
 +-------+-----------------------+--------------------------------------------------------+--------------------------+
@@ -318,7 +318,7 @@ Review deployment configuration, custom code, and integrations that may still wr
 
 ## INFO - System config changed
 
-An `etc/adminhtml/system.xml` file has had configuration paths changed.
+An `etc/adminhtml/system.xml` file or referenced system fragment has had configuration paths changed.
 
 ```
 +-------+-----------------------+--------------------------------------------------------+--------------------------+

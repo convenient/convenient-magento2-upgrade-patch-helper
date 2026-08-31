@@ -1,0 +1,2 @@
+<?xml version="1.0"?>
+<config><system><section id="cycle"><include path="Vendor_Cycle::system/a.xml"/></section></system></config>

@@ -12,7 +12,11 @@ class SystemConfigXml extends AbstractCheck
     public function canCheck()
     {
         return str_ends_with($this->patchEntry->getPath(), '/etc/adminhtml/system.xml')
-            || str_ends_with($this->patchEntry->getOriginalPath(), '/etc/adminhtml/system.xml');
+            || str_ends_with($this->patchEntry->getOriginalPath(), '/etc/adminhtml/system.xml')
+            || (str_contains($this->patchEntry->getPath(), '/etc/adminhtml/system/')
+                && str_ends_with($this->patchEntry->getPath(), '.xml'))
+            || (str_contains($this->patchEntry->getOriginalPath(), '/etc/adminhtml/system/')
+                && str_ends_with($this->patchEntry->getOriginalPath(), '.xml'));
     }
 
     /**

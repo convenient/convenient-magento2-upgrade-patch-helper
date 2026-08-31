@@ -1,0 +1,2 @@
+<?xml version="1.0"?>
+<include><group id="inactive"><field id="field" type="text"><validate>after</validate></field></group></include>

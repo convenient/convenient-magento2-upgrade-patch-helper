@@ -1,0 +1,2 @@
+<?xml version="1.0"?>
+<config><system><section id="invalid"><include path="Vendor_MalformedNew::system/fragment.xml"/></section></system></config>

@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+<config><system><section id="included">
+    <label>Updated label</label>
+    <include path="Vendor_Includes::system/functional.xml"/>
+    <group id="nested_parent"><include path="Vendor_Includes::system/outer.xml"/></group>
+</section></system></config>

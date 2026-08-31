@@ -1,0 +1,2 @@
+<?xml version="1.0"?>
+<config><system><section id="activation"><include path="Vendor_IncludeReference::system/added.xml"/></section></system></config>

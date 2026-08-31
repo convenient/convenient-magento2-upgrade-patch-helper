@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+<include><group id="settings">
+    <field id="added" type="text"/>
+    <field id="changed" type="text"><validate>updated-rule</validate></field>
+    <field id="configured" type="text"><config_path>custom/effective/path</config_path><backend_model>Vendor\Module\Updated</backend_model></field>
+</group></include>

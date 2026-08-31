@@ -112,6 +112,7 @@ echo '//not-meaningful'  >> vendor/ampersand/upgrade-patch-helper-test-module/sr
 echo '$b=1;'  >> vendor/ampersand/upgrade-patch-helper-test-module/src/module/Setup/InstallSchema.php
 cp vendor/ampersand/upgrade-patch-helper-test-module/src/module/etc/db_schema.after.xml vendor/ampersand/upgrade-patch-helper-test-module/src/module/etc/db_schema.xml
 rm vendor/ampersand/upgrade-patch-helper-test-module-to-be-removed/src/module/etc/db_schema.xml
+cp vendor/ampersand/upgrade-patch-helper-test-module/src/module/etc/adminhtml/system/functional.after.xml vendor/ampersand/upgrade-patch-helper-test-module/src/module/etc/adminhtml/system/functional.xml
 
 if [[ "$MAGE_TO" == 2.4* ]]; then
   sed -i 's|https://before.functional-csp.example|https://after.functional-csp.example|' vendor/ampersand/upgrade-patch-helper-test-module/src/module/etc/csp_whitelist.xml

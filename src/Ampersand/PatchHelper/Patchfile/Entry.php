@@ -3,6 +3,7 @@
 namespace Ampersand\PatchHelper\Patchfile;
 
 use Ampersand\PatchHelper\Exception\PluginDetectionException;
+use Ampersand\PatchHelper\Patchfile\Entry\SystemConfigDefinitions;
 use Symfony\Component\Console\Output\OutputInterface as Output;
 
 class Entry
@@ -21,6 +22,9 @@ class Entry
 
     /** @var  string|null */
     private $originalFileSanitisedContents;
+
+    /** @var SystemConfigDefinitions|null */
+    private $systemConfigParser;
 
     /**
      * @var string[]
@@ -529,7 +533,7 @@ class Entry
      */
     public function getSystemConfigDefinitionsFromOriginalFile()
     {
-        return $this->getSystemConfigDefinitionsFromFile($this->originalFilePath);
+        return $this->getSystemConfigParser()->getDefinitions()['original'];
     }
 
     /**
@@ -537,51 +541,22 @@ class Entry
      */
     public function getSystemConfigDefinitionsFromNewFile()
     {
-        return $this->getSystemConfigDefinitionsFromFile($this->newFilePath);
+        return $this->getSystemConfigParser()->getDefinitions()['new'];
     }
 
     /**
-     * @param string $file
-     * @return array<string, string>
+     * @return SystemConfigDefinitions
      */
-    private function getSystemConfigDefinitionsFromFile(string $file)
+    private function getSystemConfigParser()
     {
-        if (pathinfo($file, PATHINFO_BASENAME) !== 'system.xml') {
-            return [];
+        if ($this->systemConfigParser === null) {
+            $this->systemConfigParser = new SystemConfigDefinitions(
+                $this->directory,
+                $this->newFilePath,
+                $this->originalFilePath
+            );
         }
-
-        $filepath = realpath($this->directory . DIRECTORY_SEPARATOR . $file);
-        if (!is_file($filepath)) {
-            return [];
-        }
-
-        $previousUseInternalErrors = libxml_use_internal_errors(true);
-        try {
-            $xml = simplexml_load_file($filepath);
-            if ($xml === false) {
-                throw new \InvalidArgumentException('Unable to parse XML');
-            }
-            $data = json_decode(json_encode((array)$xml), true);
-        } finally {
-            libxml_clear_errors();
-            libxml_use_internal_errors($previousUseInternalErrors);
-        }
-
-        if (!is_array($data) || !isset($data['system']['section']) || !is_array($data['system'])) {
-            return [];
-        }
-
-        $sections = $this->getSystemConfigNodes($data['system']['section']);
-        $definitions = [];
-        foreach ($sections as $section) {
-            if (!is_array($section)) {
-                continue;
-            }
-            $definitions = array_merge($definitions, $this->extractSystemConfigFieldDefinitions($section));
-        }
-
-        ksort($definitions);
-        return $definitions;
+        return $this->systemConfigParser;
     }
 
     /**
@@ -675,82 +650,6 @@ class Entry
 
         ksort($definitions);
         return $definitions;
-    }
-
-    /**
-     * @param mixed $nodes
-     * @return array<int, mixed>
-     */
-    private function getSystemConfigNodes($nodes)
-    {
-        if (!is_array($nodes) || isset($nodes['@attributes'])) {
-            return [$nodes];
-        }
-        return $nodes;
-    }
-
-    /**
-     * @param array<mixed> $node
-     * @param string[] $path
-     * @return array<string, string>
-     */
-    private function extractSystemConfigFieldDefinitions(array $node, array $path = [])
-    {
-        if (isset($node['@attributes']['id'])) {
-            $path[] = $node['@attributes']['id'];
-        }
-
-        $definitions = [];
-        if (isset($node['field'])) {
-            foreach ($this->getSystemConfigNodes($node['field']) as $field) {
-                if (!is_array($field) || !isset($field['@attributes']['id'])) {
-                    continue;
-                }
-
-                $fieldId = $field['@attributes']['id'];
-                $fieldPath = implode('/', array_merge($path, [$fieldId]));
-                if (isset($field['config_path'])) {
-                    $configPath = $this->getSystemConfigValue($field['config_path']);
-                    if ($configPath !== null && $configPath !== '') {
-                        $fieldPath = $configPath;
-                    }
-                }
-
-                unset($field['label'], $field['comment']);
-                unset($field['@attributes']['translate'], $field['@attributes']['sortOrder']);
-                recur_ksort($field);
-                $definitions[$fieldPath] = md5(serialize($field));
-            }
-        }
-
-        if (isset($node['group'])) {
-            foreach ($this->getSystemConfigNodes($node['group']) as $group) {
-                if (!is_array($group)) {
-                    continue;
-                }
-                $definitions = array_merge(
-                    $definitions,
-                    $this->extractSystemConfigFieldDefinitions($group, $path)
-                );
-            }
-        }
-
-        return $definitions;
-    }
-
-    /**
-     * @param mixed $value
-     * @return string|null
-     */
-    private function getSystemConfigValue($value)
-    {
-        if (is_string($value)) {
-            return trim($value);
-        }
-        if (is_array($value) && isset($value[0]) && is_string($value[0])) {
-            return trim($value[0]);
-        }
-        return null;
     }
 
     /**

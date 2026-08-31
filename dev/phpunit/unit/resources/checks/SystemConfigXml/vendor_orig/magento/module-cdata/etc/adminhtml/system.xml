@@ -1,0 +1,5 @@
+<?xml version="1.0"?>
+<config><system><section id="cdata"><group id="settings">
+    <field id="changed" type="text"><source_model><![CDATA[Vendor\Module\Original]]></source_model></field>
+    <field id="equivalent" type="text"><source_model><![CDATA[Vendor\Module\Stable]]></source_model></field>
+</group></section></system></config>

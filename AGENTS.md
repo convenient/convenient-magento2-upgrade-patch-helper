@@ -77,6 +77,10 @@ When running a command directly inside an already-running `uphelper-*` fixture, 
 
 When a functional report golden-file assertion fails, inspect the failure-only artifact at `dev/phpunit/functional/actual_output/<expected-filename>.actual`. This directory is ignored by Git; use its complete report when updating golden files rather than PHPUnit's terminal diff.
 
+Prefer exercising new check behaviour through the existing broad functional reports for each fixture. Unit tests should cover the individual added, removed, changed, and edge-case semantics; do not add a focused functional method and golden for each of those cases when the broad report already covers the integration. Add a dedicated functional test only for a distinct command path or workflow that the existing suite does not exercise.
+
+Prefer DAMP unit tests: keep scenario setup and expected outcomes visible in each test, sharing only incidental mechanics. Retain distinct regression and safety cases, but avoid duplicate fixtures that exercise the same behaviour.
+
 For an existing, already-running fixture, make a targeted source-file change visible in its upgraded tree with:
 
 ```bash

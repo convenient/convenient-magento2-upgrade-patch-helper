@@ -1,0 +1,2 @@
+<?xml version="1.0"?>
+<include><group id="outer"><include path="Vendor_Includes::system/inner.xml"/></group></include>
