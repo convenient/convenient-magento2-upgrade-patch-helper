@@ -3,6 +3,7 @@
 namespace Ampersand\PatchHelper\Checks;
 
 use Ampersand\PatchHelper\Checks;
+use Ampersand\PatchHelper\Service\HyvaCompatModuleResolver;
 
 class FrontendFilePhtml extends AbstractCheck
 {
@@ -71,20 +72,28 @@ class FrontendFilePhtml extends AbstractCheck
         }
 
         $warnings = [];
+        $compatResolver = null;
 
         $module = $parts[2] . '_' . $parts[3];
         $key = $type === 'static' ? '/web/' : '/templates/';
         $name = str_replace($key, '', strstr($file, $key));
         $themes = $this->m2->getCustomThemes($area);
         foreach ($themes as $theme) {
-            $path = $this->resolve($type, $name, $area, $theme, $module);
-            if (!$path) {
+            $isHyva = isset($hyvaThemes[$theme->getCode()]);
+            // Keep normal resolution, then adjust module-file attribution for Hyva themes.
+            $paths = array_filter([$this->resolve($type, $name, $area, $theme, $module)]);
+            if ($isHyva && $this->m2->getModuleFromPath($this->patchEntry->getPath())) {
+                $compatResolver = $compatResolver ?? new HyvaCompatModuleResolver(
+                    $this->m2,
+                    $this->patchEntry,
+                    $type,
+                    \Closure::fromCallable([$this, 'resolve'])
+                );
+                $paths = $compatResolver->resolveOverrides($module, $name, $area, $theme, $paths);
+            }
+            if (!$paths) {
                 continue; // Could not resolve a path
             }
-            if (str_contains($path, 'vendor/magento/')) {
-                continue; // This is a magento file, do not report magento<->magento overrides
-            }
-            $isHyva = isset($hyvaThemes[$theme->getCode()]);
 
             if ($patchEntryFileIsHyvaBased && !$isHyva) {
                 // hyva -> magento comparison
@@ -117,9 +126,14 @@ class FrontendFilePhtml extends AbstractCheck
             // don't output the exact same file more than once
             // (can happen when you have multiple custom theme inheritance and when you don't overwrite a certain
             // file in the deepest theme)
-            if (!in_array($path, $warnings, true)) {
-                if (!str_ends_with($path, $this->patchEntry->getPath())) {
-                    $warnings[] = $path;
+            foreach ($paths as $path) {
+                if (str_contains($path, 'vendor/magento/')) {
+                    continue; // This is a magento file, do not report magento<->magento overrides
+                }
+                if (!in_array($path, $warnings, true)) {
+                    if (!str_ends_with($path, $this->patchEntry->getPath())) {
+                        $warnings[] = $path;
+                    }
                 }
             }
         }

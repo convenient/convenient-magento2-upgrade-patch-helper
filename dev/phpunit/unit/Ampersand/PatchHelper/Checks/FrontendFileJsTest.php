@@ -1,9 +1,11 @@
 <?php
 
+use Ampersand\PatchHelper\Checks;
 use Ampersand\PatchHelper\Checks\FrontendFileJs;
 use Ampersand\PatchHelper\Helper\Magento2Instance;
 use Ampersand\PatchHelper\Patchfile\Reader;
 use Ampersand\PatchHelper\Service\GetAppCodePathFromVendorPath;
+use Hyva\CompatModuleFallback\Model\CompatModuleRegistry;
 
 class FrontendFileJsTest extends \PHPUnit\Framework\TestCase
 {
@@ -15,11 +17,14 @@ class FrontendFileJsTest extends \PHPUnit\Framework\TestCase
     /** @var \Magento\Framework\View\Design\FileResolution\Fallback\Resolver\Minification|\PHPUnit\Framework\MockObject\MockObject */
     private $minificationResolver;
 
-    protected function setUp(): void
+    public function testFrontendFileJs()
     {
         $this->m2 = $this->getMockBuilder(Magento2Instance::class)
             ->disableOriginalConstructor()
             ->getMock();
+
+        $this->m2->expects($this->never())->method('getObjectManager');
+        $this->m2->expects($this->never())->method('getAreaConfig');
 
         $this->m2->expects($this->once())
             ->method('getListOfThemeDirectories')
@@ -52,13 +57,7 @@ class FrontendFileJsTest extends \PHPUnit\Framework\TestCase
                     'vendor/magento/module-checkout/' => 'Magento_Checkout'
                 ]
             );
-    }
 
-    /**
-     *
-     */
-    public function testFrontendFileJs()
-    {
         $themeMock = $this->getMockBuilder(\Magento\Theme\Model\Theme::class)
             ->setMethods(['getCode'])
             ->getMock();
@@ -119,5 +118,115 @@ class FrontendFileJsTest extends \PHPUnit\Framework\TestCase
             ]
         ];
         $this->assertEquals($expectedWarnings, $warnings);
+    }
+
+    /** @dataProvider changedPackages */
+    public function testHyvaCompatibilityJavaScriptChangeIsReportedAgainstOriginalModuleOverride(string $package): void
+    {
+        $resources = BASE_DIR . '/dev/phpunit/unit/resources/checks/FrontendFileJs/hyva-compatibility';
+        $basePath = 'vendor/amasty/gdpr-cookie/view/frontend/web/js/cookie-settings.js';
+        $compatPath = 'vendor/amasty/module-gdpr-cookie-hyva/view/frontend/web/js/cookie-settings.js';
+        $override = 'app/design/frontend/Vendor/hyva-theme/Amasty_GdprCookie/web/js/cookie-settings.js';
+
+        $baseTheme = $this->getMockBuilder(\Magento\Theme\Model\Theme::class)
+            ->setMethods(['getCode'])->getMock();
+        $baseTheme->method('getCode')->willReturn('Hyva/default');
+        $theme = $this->getMockBuilder(\Magento\Theme\Model\Theme::class)
+            ->setMethods(['getCode'])->getMock();
+        $theme->method('getCode')->willReturn('Vendor/hyva-theme');
+
+        $registry = $this->getMockBuilder(CompatModuleRegistry::class)
+            ->setMethods(['getCompatModulesFor', 'getCompatModules', 'getOrigModules'])->getMock();
+        $registry->method('getCompatModulesFor')->willReturnMap([
+            ['Amasty_GdprCookie', ['Amasty_GdprCookieHyva']],
+            ['Amasty_GdprCookieHyva', []],
+        ]);
+        $registry->method('getCompatModules')->willReturn(['Amasty_GdprCookieHyva']);
+        $registry->method('getOrigModules')->willReturn(['Amasty_GdprCookie']);
+        $objectManager = $this->getMockBuilder(\Magento\Framework\ObjectManagerInterface::class)
+            ->setMethods(['get'])->getMock();
+        $objectManager->method('get')->with(CompatModuleRegistry::class)->willReturn($registry);
+
+        $resolver = $this->getMockBuilder(\Magento\Framework\View\Design\FileResolution\Fallback\Resolver\Minification::class)
+            ->setMethods(['resolve'])->getMock();
+        // Hyva fallback preserves original-module theme overrides; explicit compat requests do not reverse-map them.
+        $resolver->method('resolve')->willReturnMap([
+            ['static', 'js/cookie-settings.js', 'frontend', $baseTheme, null, 'Amasty_GdprCookie', $compatPath],
+            ['static', 'js/cookie-settings.js', 'frontend', $theme, null, 'Amasty_GdprCookie', $override],
+            ['static', 'js/cookie-settings.js', 'frontend', $baseTheme, null, 'Amasty_GdprCookieHyva', $compatPath],
+            ['static', 'js/cookie-settings.js', 'frontend', $theme, null, 'Amasty_GdprCookieHyva', $compatPath],
+        ]);
+
+        $m2 = $this->getMockBuilder(Magento2Instance::class)->disableOriginalConstructor()->getMock();
+        $m2->method('getObjectManager')->willReturn($objectManager);
+        $m2->method('getAreaConfig')->willReturn([
+            'frontend' => [
+                'Magento\\Framework\\View\\Design\\Fallback\\Rule\\ModularSwitch' => [
+                    'plugins' => ['hyva_compat_module_fallback' => [
+                        'instance' => 'Hyva\\CompatModuleFallback\\Plugin\\ViewFileOverride',
+                    ]],
+                ],
+            ],
+        ]);
+        $m2->method('getMagentoRoot')->willReturn($resources);
+        $m2->method('getListOfPathsToModules')->willReturn([
+            'vendor/amasty/gdpr-cookie/' => 'Amasty_GdprCookie',
+            'vendor/amasty/module-gdpr-cookie-hyva/' => 'Amasty_GdprCookieHyva',
+        ]);
+        $m2->method('getModuleFromPath')->willReturnMap([
+            [$basePath, 'Amasty_GdprCookie'],
+            [$compatPath, 'Amasty_GdprCookieHyva'],
+        ]);
+        $m2->method('getListOfPathsToLibrarys')->willReturn([]);
+        $m2->method('getListOfThemeDirectories')->willReturn([
+            'vendor/hyva-themes/magento2-default-theme/',
+            'app/design/frontend/Vendor/hyva-theme/',
+        ]);
+        $m2->method('getListOfHyvaThemeDirectories')->willReturn([
+            'vendor/hyva-themes/magento2-default-theme/',
+            'app/design/frontend/Vendor/hyva-theme/',
+        ]);
+        $m2->method('getListOfHyvaThemeFallbackDirectories')->willReturn([]);
+        $m2->method('getHyvaBaseThemes')->willReturn(['Hyva/default' => $baseTheme]);
+        $m2->method('getHyvaThemes')->willReturn(['Hyva/default' => $baseTheme, 'Vendor/hyva-theme' => $theme]);
+        $m2->method('getCustomThemes')->with('frontend')->willReturn([$theme]);
+        $m2->method('getMinificationResolver')->willReturn($resolver);
+
+        $entries = (new Reader($resources . '/vendor.patch'))->getFiles();
+        $this->assertCount(2, $entries);
+        $warningsBySource = [];
+        $cwd = getcwd();
+        try {
+            chdir($resources);
+            foreach ($entries as $entry) {
+                if ($package && !str_starts_with($entry->getPath(), 'vendor/amasty/' . $package . '/')) {
+                    continue;
+                }
+                $this->assertTrue($entry->fileWasModified());
+                $this->assertTrue($entry->vendorChangeIsMeaningful());
+                $warnings = $infos = $ignored = [];
+                $appCodePath = (new GetAppCodePathFromVendorPath($m2, $entry))->getAppCodePathFromVendorPath();
+                $check = new FrontendFileJs($m2, $entry, $appCodePath, $warnings, $infos, $ignored);
+                $this->assertTrue($check->canCheck());
+                $check->check();
+                $this->assertEmpty($infos);
+                $this->assertEmpty($ignored);
+                if ($warnings) {
+                    $warningsBySource[$entry->getPath()] = $warnings;
+                }
+            }
+        } finally {
+            chdir($cwd);
+        }
+
+        $expected = $package === 'gdpr-cookie' ? [] : [
+            $compatPath => [Checks::TYPE_FILE_OVERRIDE => [$override]],
+        ];
+        $this->assertSame($expected, $warningsBySource); // issue 130
+    }
+
+    public function changedPackages(): array
+    {
+        return ['both packages' => [''], 'base only' => ['gdpr-cookie'], 'compatibility only' => ['module-gdpr-cookie-hyva']];
     }
 }

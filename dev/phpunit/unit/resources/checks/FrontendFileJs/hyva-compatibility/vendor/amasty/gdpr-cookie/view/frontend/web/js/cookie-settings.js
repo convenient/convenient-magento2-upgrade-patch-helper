@@ -1,0 +1,1 @@
+window.cookieSettings = { enabled: true };

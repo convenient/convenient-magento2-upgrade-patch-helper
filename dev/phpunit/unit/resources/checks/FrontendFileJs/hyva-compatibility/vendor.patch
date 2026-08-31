@@ -1,0 +1,12 @@
+diff -ur -N vendor_orig/amasty/gdpr-cookie/view/frontend/web/js/cookie-settings.js vendor/amasty/gdpr-cookie/view/frontend/web/js/cookie-settings.js
+--- vendor_orig/amasty/gdpr-cookie/view/frontend/web/js/cookie-settings.js
++++ vendor/amasty/gdpr-cookie/view/frontend/web/js/cookie-settings.js
+@@ -1 +1 @@
+-window.cookieSettings = { enabled: false };
++window.cookieSettings = { enabled: true };
+diff -ur -N vendor_orig/amasty/module-gdpr-cookie-hyva/view/frontend/web/js/cookie-settings.js vendor/amasty/module-gdpr-cookie-hyva/view/frontend/web/js/cookie-settings.js
+--- vendor_orig/amasty/module-gdpr-cookie-hyva/view/frontend/web/js/cookie-settings.js
++++ vendor/amasty/module-gdpr-cookie-hyva/view/frontend/web/js/cookie-settings.js
+@@ -1 +1 @@
+-window.hyvaCookieSettings = { open: false };
++window.hyvaCookieSettings = { open: true };

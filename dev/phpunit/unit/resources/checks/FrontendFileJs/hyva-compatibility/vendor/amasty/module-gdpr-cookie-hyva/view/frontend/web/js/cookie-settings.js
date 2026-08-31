@@ -1,0 +1,1 @@
+window.hyvaCookieSettings = { open: true };

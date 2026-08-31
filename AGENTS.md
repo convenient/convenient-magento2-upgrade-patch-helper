@@ -8,6 +8,8 @@ Read [README.md](README.md) for the end-user workflow, [docs/CHECKS_AVAILABLE.md
 
 ## Analysis model
 
+Hyvä is optional in analysed Magento installations. Never assume its packages, classes, modules or configuration exist. Guard Hyvä-specific behaviour and preserve ordinary Magento analysis when Hyvä is absent. Cover this absence in unit tests for changes that integrate with Hyvä.
+
 Run the helper against a local Magento project after the upgrade has completed. Keep all of the following available in that project:
 
 - The upgraded `vendor/` directory.
@@ -56,6 +58,8 @@ For changes that interpret Magento behaviour—such as XML/config merging, DI, l
 
 ## Check implementation and documentation
 
+Prefer the smallest clear change that solves the problem. Add only the code and abstractions needed for the requested behaviour, and do not refactor unrelated code.
+
 Keep generic `src/Ampersand/PatchHelper/Patchfile/Entry.php` focused on patch-entry behaviour. Put substantial check-specific parsing and definition-building in named classes under `src/Ampersand/PatchHelper/Patchfile/Entry/`, following `SystemConfigDefinitions.php`, and have `Entry` delegate to them. These are collaborators, not PHP subclasses. Do not create a class for every trivial getter or refactor unrelated checks.
 
 Keep entries in `docs/CHECKS_AVAILABLE.md` concise: state what the check reports and the review action needed. Do not add parser mechanics, internal identities or test rationale unless users need them to interpret the report. For an existing check, update documentation only when user-visible interpretation changes.
@@ -79,6 +83,10 @@ make docker-test ENV=m24nodb PHPUNIT_ARGS='--filter testNameGoesHere'
 ```
 
 The available environments and their Magento/PHP combinations are defined in `dev/Docker/docker-compose.yml`. CI runs static analysis and unit tests first, then runs the Docker functional matrix. Do not assume an individual functional environment represents every supported version pair.
+
+Preserve real Magento and Hyvä behaviour in functional fixtures, including module configuration, theme inheritance and fallback resolution. Stub third-party modules where needed rather than replacing framework behaviour. Document the purpose and limitations of any version-specific framework stub.
+
+Fixture setup must work unattended in CI. Do not introduce private repositories, personal SSH access or unnecessary bundled dependencies merely to make local fixtures work.
 
 When running an ad hoc command directly inside an already-running `uphelper-*` fixture, use `bash -c 'source /root/.bashrc; <command>'` rather than `sh` or varying between `bash -c` and `bash -lc`. This initializes `phpenv` and makes the selected `php` executable available. The existing test and sync scripts already source `/root/.bashrc` themselves.
 
