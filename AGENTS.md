@@ -28,7 +28,8 @@ For changes that interpret Magento behaviour—such as XML/config merging, DI, l
 - Start with the local Magento 2.4.8 reference checkout at `dev/vanilla/vendor/magento/`. Use the relevant schema, reader/converter, service, interface, or other core implementation to establish valid input, effective identity and merge rules, meaningful attributes/text, and any normalisation Magento does or does not perform.
 - Distinguish source declaration identity, effective Magento configuration and the report label. Choose comparison semantics from the requested reporting contract and core evidence, not merely from existing helper code or fixtures.
 - Keep this helper's compact parsing and array-lookup approach. The reference establishes what the helper's map must mean; do not copy Magento runtime classes into the helper or require Magento bootstrapping for its unit tests.
-- Normal-behaviour fixtures should be valid against the relevant Magento contract where practical. Use malformed or unsupported inputs only in explicitly named error-path tests.
+- Keep analysis parsers as tolerant extractors, not duplicate schema validators: report malformed input when it prevents parsing, then read only the declarations and fields needed for the check. Do not reproduce complete Magento XSD validation or reject unrelated/unknown declarations unless that validation is itself part of the requested report contract.
+- Build normal-behaviour unit fixtures from valid declarations under the relevant Magento XSD. Put malformed or unsupported declarations only in explicitly named error-path cases, with the expected error asserted when the check is intended to surface it.
 - If `dev/vanilla` is absent or incomplete, stop before implementing Magento-semantic behaviour and ask the user to either run:
 
   ```bash

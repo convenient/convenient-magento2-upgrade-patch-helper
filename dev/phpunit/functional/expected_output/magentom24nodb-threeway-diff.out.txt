@@ -121,6 +121,6 @@ phpstorm diff vendor/magento/theme-frontend-luma/etc/view.xml vendor/ampersand/u
 phpstorm diff vendor/paypal/module-braintree-core/view/base/web/js/form-builder.js vendor/paypal/module-braintree-core/view/frontend/web/js/form-builder.js vendor_orig/paypal/module-braintree-core/view/base/web/js/form-builder.js
 phpstorm diff vendor/paypal/module-braintree-core/view/frontend/templates/paypal/vault_token.phtml vendor/hyva-themes/magento2-default-theme/PayPal_Braintree/templates/paypal/vault_token.phtml vendor_orig/paypal/module-braintree-core/view/frontend/templates/paypal/vault_token.phtml
 WARN count: 68
-INFO count: 2008 (to view re-run this tool with --show-info)
+INFO count: 2087 (to view re-run this tool with --show-info)
 IGNORE count: 11 (to view re-run this tool with --show-ignore)
 For docs on each check see https://github.com/AmpersandHQ/ampersand-magento2-upgrade-patch-helper/blob/master/docs/CHECKS_AVAILABLE.md

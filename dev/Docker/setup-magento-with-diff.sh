@@ -139,6 +139,7 @@ echo '//not-meaningful'  >> vendor/ampersand/upgrade-patch-helper-test-module/sr
 echo '//not-meaningful'  >> vendor/ampersand/upgrade-patch-helper-test-module/src/module/Setup/Patch/Data/SomeDataNonChanges.php
 echo '$b=1;'  >> vendor/ampersand/upgrade-patch-helper-test-module/src/module/Setup/InstallSchema.php
 cp vendor/ampersand/upgrade-patch-helper-test-module/src/module/etc/db_schema.after.xml vendor/ampersand/upgrade-patch-helper-test-module/src/module/etc/db_schema.xml
+cp vendor/ampersand/upgrade-patch-helper-test-module/src/module/etc/webapi.after.xml vendor/ampersand/upgrade-patch-helper-test-module/src/module/etc/webapi.xml
 rm vendor/ampersand/upgrade-patch-helper-test-module-to-be-removed/src/module/etc/db_schema.xml
 cp vendor/ampersand/upgrade-patch-helper-test-module/src/module/etc/adminhtml/system/functional.after.xml vendor/ampersand/upgrade-patch-helper-test-module/src/module/etc/adminhtml/system/functional.xml
 

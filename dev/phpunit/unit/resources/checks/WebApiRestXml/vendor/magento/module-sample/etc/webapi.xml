@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<routes>
+    <route url="/V1/service-class" method="GET"><service class="Vendor\Api\ReplacementInterface" method="get"/><resources><resource ref="Vendor_Module::all"/></resources></route>
+    <route url="/V1/service-method" method="GET"><service class="Vendor\Api\ServiceInterface" method="replacement"/><resources><resource ref="Vendor_Module::all"/></resources></route>
+    <route url="/V1/secure" method="GET" secure="true"><service class="Vendor\Api\SecureInterface" method="get"/><resources><resource ref="Vendor_Module::all"/></resources></route>
+    <route url="/V1/resources" method="GET"><service class="Vendor\Api\ResourcesInterface" method="get"/><resources><resource ref="Vendor_Module::replacement"/></resources></route>
+    <route url="/V1/parameters" method="GET"><service class="Vendor\Api\ParametersInterface" method="get"/><resources><resource ref="Vendor_Module::all"/></resources><data><parameter name="id" force="false">two</parameter></data></route>
+    <route url="/V1/array-limit" method="GET"><service class="Vendor\Api\ArrayLimitInterface" method="get"/><resources><resource ref="Vendor_Module::all"/></resources><data input-array-size-limit="20"/></route>
+    <route url="/V1/added" method="POST"><service class="Vendor\Api\AddedInterface" method="save"/><resources><resource ref="Vendor_Module::all"/></resources></route>
+</routes>

@@ -1,0 +1,7 @@
+<routes>
+    <route method="GET" url="/V1/normalized" soapOperation="replacement">
+        <service method="get" class="Vendor\Api\NormalizedInterface"/>
+        <resources><resource ref="Vendor_Module::first"/><resource ref="Vendor_Module::second"/></resources>
+        <data input-array-size-limit="10"><parameter force="true" name="first">first</parameter><parameter name="second">second</parameter></data>
+    </route>
+</routes>

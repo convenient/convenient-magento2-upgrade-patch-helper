@@ -1,0 +1,1 @@
+<routes><route url="/V1/removed-file" method="DELETE"><service class="Vendor\Api\RemovedInterface" method="delete"/><resources><resource ref="Vendor_Module::all"/></resources></route></routes>

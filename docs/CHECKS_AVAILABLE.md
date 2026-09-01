@@ -21,6 +21,9 @@
 - [INFO - CSP added](#info---csp-added)
 - [INFO - CSP removed](#info---csp-removed)
 - [INFO - CSP changed](#info---csp-changed)
+- [INFO - REST WebAPI added](#info---rest-webapi-added)
+- [INFO - REST WebAPI removed](#info---rest-webapi-removed)
+- [INFO - REST WebAPI changed](#info---rest-webapi-changed)
 - [INFO - DB schema added](#info---db-schema-added)
 - [INFO - DB schema removed](#info---db-schema-removed)
 - [INFO - DB schema changed](#info---db-schema-changed)
@@ -377,6 +380,54 @@ Example:
 ```
 
 Review the upgrade patch for the previous and replacement definitions, then check CSP customisations and integrations for compatibility.
+
+## INFO - REST WebAPI added
+
+A REST route has been added in `etc/webapi.xml`.
+
+Example:
+
+```
++-------+-------------------+------------------------------------------------+--------------------------+
+| Level | Type              | File                                           | To Check                 |
++-------+-------------------+------------------------------------------------+--------------------------+
+| INFO  | REST WebAPI added | vendor/magento/module-example/etc/webapi.xml  | POST /V1/example         |
++-------+-------------------+------------------------------------------------+--------------------------+
+```
+
+Review integrations that may use or need to authorize the new endpoint.
+
+## INFO - REST WebAPI removed
+
+A REST route has been removed from `etc/webapi.xml`.
+
+Example:
+
+```
++-------+---------------------+------------------------------------------------+--------------------------+
+| Level | Type                | File                                           | To Check                 |
++-------+---------------------+------------------------------------------------+--------------------------+
+| INFO  | REST WebAPI removed | vendor/magento/module-example/etc/webapi.xml  | GET /V1/example/:id      |
++-------+---------------------+------------------------------------------------+--------------------------+
+```
+
+Review integrations that may still call the removed endpoint.
+
+## INFO - REST WebAPI changed
+
+A REST route keeps the same URL and HTTP method but its declaration has changed.
+
+Example:
+
+```
++-------+---------------------+------------------------------------------------+--------------------------+
+| Level | Type                | File                                           | To Check                 |
++-------+---------------------+------------------------------------------------+--------------------------+
+| INFO  | REST WebAPI changed | vendor/magento/module-example/etc/webapi.xml  | GET /V1/example/:id      |
++-------+---------------------+------------------------------------------------+--------------------------+
+```
+
+Review the before and after route declarations, including service mapping, authorization, and request data handling, for affected integrations.
 
 ## INFO - DB schema added	    
 A `db_schema.xml` affecting the highlighted table has been added.  

@@ -1,0 +1,1 @@
+<routes><route url="/V1/valid" method="GET"><service class="Vendor\Api\ValidInterface" method="get"/></route></routes>

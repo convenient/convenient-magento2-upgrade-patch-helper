@@ -8,6 +8,7 @@ use Ampersand\PatchHelper\Patchfile\Entry\DatabaseTableDefinitions;
 use Ampersand\PatchHelper\Patchfile\Entry\InterceptablePhpFunctions;
 use Ampersand\PatchHelper\Patchfile\Entry\QueueConsumers;
 use Ampersand\PatchHelper\Patchfile\Entry\SystemConfigDefinitions;
+use Ampersand\PatchHelper\Patchfile\Entry\WebApiRestDefinitions;
 use Symfony\Component\Console\Output\OutputInterface as Output;
 
 class Entry
@@ -35,6 +36,9 @@ class Entry
 
     /** @var ContentSecurityDefinitions|null */
     private $contentSecurityDefinitions;
+
+    /** @var WebApiRestDefinitions|null */
+    private $webApiRestDefinitions;
 
     /**
      * @var string[]
@@ -448,6 +452,33 @@ class Entry
     public function getContentSecurityDefinitionsFromNewFile()
     {
         return $this->getContentSecurityDefinitionParser()->getDefinitions($this->newFilePath);
+    }
+
+    /**
+     * @return array<string, array{label: string, value: string}>
+     */
+    public function getWebApiRestDefinitionsFromOriginalFile()
+    {
+        return $this->getWebApiRestDefinitions()->getDefinitions($this->originalFilePath);
+    }
+
+    /**
+     * @return array<string, array{label: string, value: string}>
+     */
+    public function getWebApiRestDefinitionsFromNewFile()
+    {
+        return $this->getWebApiRestDefinitions()->getDefinitions($this->newFilePath);
+    }
+
+    /**
+     * @return WebApiRestDefinitions
+     */
+    private function getWebApiRestDefinitions()
+    {
+        if ($this->webApiRestDefinitions === null) {
+            $this->webApiRestDefinitions = new WebApiRestDefinitions($this->directory);
+        }
+        return $this->webApiRestDefinitions;
     }
 
     /**

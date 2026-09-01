@@ -15,6 +15,9 @@ class Checks
     public const TYPE_CSP_ADDED = 'CSP added';
     public const TYPE_CSP_REMOVED = 'CSP removed';
     public const TYPE_CSP_CHANGED = 'CSP changed';
+    public const TYPE_WEBAPI_REST_ADDED = 'REST WebAPI added';
+    public const TYPE_WEBAPI_REST_REMOVED = 'REST WebAPI removed';
+    public const TYPE_WEBAPI_REST_CHANGED = 'REST WebAPI changed';
     public const TYPE_PREFERENCE_REMOVED = 'Preference Removed';
     public const TYPE_PREFERENCE = 'Preference';
     public const TYPE_METHOD_PLUGIN = 'Plugin';
