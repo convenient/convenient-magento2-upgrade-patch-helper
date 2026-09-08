@@ -24,6 +24,12 @@
 - [INFO - REST WebAPI added](#info---rest-webapi-added)
 - [INFO - REST WebAPI removed](#info---rest-webapi-removed)
 - [INFO - REST WebAPI changed](#info---rest-webapi-changed)
+- [INFO - GraphQL Query added](#info---graphql-query-added)
+- [INFO - GraphQL Query removed](#info---graphql-query-removed)
+- [INFO - GraphQL Query changed](#info---graphql-query-changed)
+- [INFO - GraphQL Mutation added](#info---graphql-mutation-added)
+- [INFO - GraphQL Mutation removed](#info---graphql-mutation-removed)
+- [INFO - GraphQL Mutation changed](#info---graphql-mutation-changed)
 - [INFO - DB schema added](#info---db-schema-added)
 - [INFO - DB schema removed](#info---db-schema-removed)
 - [INFO - DB schema changed](#info---db-schema-changed)
@@ -428,6 +434,102 @@ Example:
 ```
 
 Review the before and after route declarations, including service mapping, authorization, and request data handling, for affected integrations.
+
+## INFO - GraphQL Query added
+
+A root `Query` field has been added in `etc/schema.graphqls`.
+
+Example:
+
+```
++-------+---------------------+----------------------------------------------------+----------------+
+| Level | Type                | File                                               | To Check       |
++-------+---------------------+----------------------------------------------------+----------------+
+| INFO  | GraphQL Query added | vendor/magento/module-example/etc/schema.graphqls | Query products |
++-------+---------------------+----------------------------------------------------+----------------+
+```
+
+This identifies a new public GraphQL query declaration.
+
+## INFO - GraphQL Query removed
+
+A root `Query` field has been removed from `etc/schema.graphqls`.
+
+Example:
+
+```
++-------+-----------------------+----------------------------------------------------+----------------+
+| Level | Type                  | File                                               | To Check       |
++-------+-----------------------+----------------------------------------------------+----------------+
+| INFO  | GraphQL Query removed | vendor/magento/module-example/etc/schema.graphqls | Query products |
++-------+-----------------------+----------------------------------------------------+----------------+
+```
+
+This identifies a removed public GraphQL query declaration.
+
+## INFO - GraphQL Query changed
+
+A root `Query` field keeps the same name but its contract has changed.
+
+Example:
+
+```
++-------+-----------------------+----------------------------------------------------+----------------+
+| Level | Type                  | File                                               | To Check       |
++-------+-----------------------+----------------------------------------------------+----------------+
+| INFO  | GraphQL Query changed | vendor/magento/module-example/etc/schema.graphqls | Query products |
++-------+-----------------------+----------------------------------------------------+----------------+
+```
+
+This identifies a change to its arguments, return type, nullability, directives, or a type declaration reachable from the field in the same changed schema file.
+
+## INFO - GraphQL Mutation added
+
+A root `Mutation` field has been added in `etc/schema.graphqls`.
+
+Example:
+
+```
++-------+------------------------+----------------------------------------------------+-------------------------+
+| Level | Type                   | File                                               | To Check                |
++-------+------------------------+----------------------------------------------------+-------------------------+
+| INFO  | GraphQL Mutation added | vendor/magento/module-example/etc/schema.graphqls | Mutation createCustomer |
++-------+------------------------+----------------------------------------------------+-------------------------+
+```
+
+This identifies a new public GraphQL mutation declaration.
+
+## INFO - GraphQL Mutation removed
+
+A root `Mutation` field has been removed from `etc/schema.graphqls`.
+
+Example:
+
+```
++-------+--------------------------+----------------------------------------------------+-------------------------+
+| Level | Type                     | File                                               | To Check                |
++-------+--------------------------+----------------------------------------------------+-------------------------+
+| INFO  | GraphQL Mutation removed | vendor/magento/module-example/etc/schema.graphqls | Mutation createCustomer |
++-------+--------------------------+----------------------------------------------------+-------------------------+
+```
+
+This identifies a removed public GraphQL mutation declaration.
+
+## INFO - GraphQL Mutation changed
+
+A root `Mutation` field keeps the same name but its contract has changed.
+
+Example:
+
+```
++-------+--------------------------+----------------------------------------------------+-------------------------+
+| Level | Type                     | File                                               | To Check                |
++-------+--------------------------+----------------------------------------------------+-------------------------+
+| INFO  | GraphQL Mutation changed | vendor/magento/module-example/etc/schema.graphqls | Mutation createCustomer |
++-------+--------------------------+----------------------------------------------------+-------------------------+
+```
+
+This identifies a change to its arguments, return type, nullability, directives, or a type declaration reachable from the field in the same changed schema file. 
 
 ## INFO - DB schema added	    
 A `db_schema.xml` affecting the highlighted table has been added.  

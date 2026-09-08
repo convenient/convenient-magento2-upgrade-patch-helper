@@ -1,0 +1,11 @@
+"""Old presentation"""
+type Query {
+    products(filter: Input = {b: 2, a: 1}): SupportingType @doc(description: "Old")
+}
+
+type SupportingType implements FirstInterface, SecondInterface { value: String @doc(description: "Old") }
+
+type UnrelatedType { value: String }
+
+enum EmptyEnum {
+}

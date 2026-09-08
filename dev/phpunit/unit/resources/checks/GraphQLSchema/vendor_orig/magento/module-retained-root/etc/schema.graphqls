@@ -1,0 +1,7 @@
+type Query {
+    superseded: String
+}
+
+extend type Query {
+    retained: String
+}

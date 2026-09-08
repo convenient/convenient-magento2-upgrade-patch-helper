@@ -1,0 +1,15 @@
+type SupportingType implements FirstInterface, SecondInterface {
+    value: String @doc(description: "New")
+}
+
+type UnrelatedType { value: String! }
+
+enum EmptyEnum {
+}
+
+"""New presentation"""
+type Query {
+    products(
+        filter: Input = {a: 1, b: 2}
+    ): SupportingType @doc(description: "New")
+}

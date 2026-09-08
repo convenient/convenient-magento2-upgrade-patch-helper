@@ -97,6 +97,12 @@ class PatchOverrideValidator
             Checks::TYPE_WEBAPI_REST_ADDED => [],
             Checks::TYPE_WEBAPI_REST_REMOVED => [],
             Checks::TYPE_WEBAPI_REST_CHANGED => [],
+            Checks::TYPE_GRAPHQL_QUERY_ADDED => [],
+            Checks::TYPE_GRAPHQL_QUERY_REMOVED => [],
+            Checks::TYPE_GRAPHQL_QUERY_CHANGED => [],
+            Checks::TYPE_GRAPHQL_MUTATION_ADDED => [],
+            Checks::TYPE_GRAPHQL_MUTATION_REMOVED => [],
+            Checks::TYPE_GRAPHQL_MUTATION_CHANGED => [],
             Checks::TYPE_DB_SCHEMA_ADDED => [],
             Checks::TYPE_DB_SCHEMA_REMOVED => [],
             Checks::TYPE_DB_SCHEMA_CHANGED => [],
@@ -168,6 +174,14 @@ class PatchOverrideValidator
                 $this->ignored
             ),
             new Checks\WebApiRestXml(
+                $m2,
+                $patchEntry,
+                $this->appCodeFilepath,
+                $this->warnings,
+                $this->infos,
+                $this->ignored
+            ),
+            new Checks\GraphQLSchema(
                 $m2,
                 $patchEntry,
                 $this->appCodeFilepath,

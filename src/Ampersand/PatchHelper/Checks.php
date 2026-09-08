@@ -18,6 +18,12 @@ class Checks
     public const TYPE_WEBAPI_REST_ADDED = 'REST WebAPI added';
     public const TYPE_WEBAPI_REST_REMOVED = 'REST WebAPI removed';
     public const TYPE_WEBAPI_REST_CHANGED = 'REST WebAPI changed';
+    public const TYPE_GRAPHQL_QUERY_ADDED = 'GraphQL Query added';
+    public const TYPE_GRAPHQL_QUERY_REMOVED = 'GraphQL Query removed';
+    public const TYPE_GRAPHQL_QUERY_CHANGED = 'GraphQL Query changed';
+    public const TYPE_GRAPHQL_MUTATION_ADDED = 'GraphQL Mutation added';
+    public const TYPE_GRAPHQL_MUTATION_REMOVED = 'GraphQL Mutation removed';
+    public const TYPE_GRAPHQL_MUTATION_CHANGED = 'GraphQL Mutation changed';
     public const TYPE_PREFERENCE_REMOVED = 'Preference Removed';
     public const TYPE_PREFERENCE = 'Preference';
     public const TYPE_METHOD_PLUGIN = 'Plugin';

@@ -1,0 +1,40 @@
+type Query {
+    products(filter: ProductsFilter): Products
+    external: ExternalProducts
+}
+
+type Products implements ProductInterface {
+    item: Product
+    results: [SearchResult]
+    availableOn: LocalDate
+}
+
+interface ProductInterface {
+    sku: String!
+}
+
+type Product {
+    sku: String @resolver(class: "Example\\NewResolver")
+    products: [Products]
+}
+
+type RelatedProduct {
+    id: ID
+}
+
+type NewProduct {
+    id: ID
+}
+
+union SearchResult = Product | RelatedProduct | NewProduct
+
+input ProductsFilter {
+    mode: ProductMode = LEGACY @deprecated(reason: "Use another filter")
+}
+
+enum ProductMode {
+    BASIC
+    LEGACY @deprecated(reason: "Old mode")
+}
+
+scalar LocalDate @specifiedBy(url: "new")

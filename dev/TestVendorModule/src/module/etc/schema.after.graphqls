@@ -1,0 +1,18 @@
+type Query {
+    upgradeHelperAddedQuery: String
+    upgradeHelperChangedQuery: String! @resolver(class: "Ampersand\\TestVendor\\Model\\NewResolver")
+    upgradeHelperReachableQuery: UpgradeHelperGraphQlResult
+}
+
+type UpgradeHelperGraphQlResult implements UpgradeHelperGraphQlResultInterface {
+    value: String
+}
+
+interface UpgradeHelperGraphQlResultInterface {
+    stockStatus: String! @resolver(class: "Ampersand\\TestVendor\\Model\\NewNestedResolver")
+}
+
+type Mutation {
+    upgradeHelperAddedMutation: String
+    upgradeHelperChangedMutation: String!
+}

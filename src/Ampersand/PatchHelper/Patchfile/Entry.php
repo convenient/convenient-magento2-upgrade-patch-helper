@@ -5,6 +5,7 @@ namespace Ampersand\PatchHelper\Patchfile;
 use Ampersand\PatchHelper\Exception\PluginDetectionException;
 use Ampersand\PatchHelper\Patchfile\Entry\ContentSecurityDefinitions;
 use Ampersand\PatchHelper\Patchfile\Entry\DatabaseTableDefinitions;
+use Ampersand\PatchHelper\Patchfile\Entry\GraphQLSchemaDefinitions;
 use Ampersand\PatchHelper\Patchfile\Entry\InterceptablePhpFunctions;
 use Ampersand\PatchHelper\Patchfile\Entry\QueueConsumers;
 use Ampersand\PatchHelper\Patchfile\Entry\SystemConfigDefinitions;
@@ -39,6 +40,9 @@ class Entry
 
     /** @var WebApiRestDefinitions|null */
     private $webApiRestDefinitions;
+
+    /** @var GraphQLSchemaDefinitions|null */
+    private $graphQLSchemaDefinitions;
 
     /**
      * @var string[]
@@ -468,6 +472,33 @@ class Entry
     public function getWebApiRestDefinitionsFromNewFile()
     {
         return $this->getWebApiRestDefinitions()->getDefinitions($this->newFilePath);
+    }
+
+    /**
+     * @return array<string, array{label: string, value: string}>
+     */
+    public function getGraphQLSchemaDefinitionsFromOriginalFile()
+    {
+        return $this->getGraphQLSchemaDefinitions()->getDefinitions($this->originalFilePath);
+    }
+
+    /**
+     * @return array<string, array{label: string, value: string}>
+     */
+    public function getGraphQLSchemaDefinitionsFromNewFile()
+    {
+        return $this->getGraphQLSchemaDefinitions()->getDefinitions($this->newFilePath);
+    }
+
+    /**
+     * @return GraphQLSchemaDefinitions
+     */
+    private function getGraphQLSchemaDefinitions()
+    {
+        if ($this->graphQLSchemaDefinitions === null) {
+            $this->graphQLSchemaDefinitions = new GraphQLSchemaDefinitions($this->directory);
+        }
+        return $this->graphQLSchemaDefinitions;
     }
 
     /**

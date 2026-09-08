@@ -1,0 +1,11 @@
+type Query {
+    products: Products
+}
+
+type Products implements ProductInterface {
+    items: [String]
+}
+
+interface ProductInterface {
+    sku: String!
+}
