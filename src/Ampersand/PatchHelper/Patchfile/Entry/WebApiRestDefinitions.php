@@ -22,6 +22,14 @@ class WebApiRestDefinitions
         }
 
         $filepath = realpath($this->directory . DIRECTORY_SEPARATOR . $file);
+        return $this->getDefinitionsFromFilepath($filepath ?: '');
+    }
+
+    /**
+     * @return array<string, array{label: string, value: string}>
+     */
+    public function getDefinitionsFromFilepath(string $filepath)
+    {
         if (!is_file($filepath)) {
             return [];
         }

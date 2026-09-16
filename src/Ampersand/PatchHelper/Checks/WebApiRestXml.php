@@ -16,13 +16,14 @@ class WebApiRestXml extends AbstractCheck
     }
 
     /**
-     * Add INFO notices when REST WebAPI routes are added, removed or changed.
+     * Add REST WebAPI notices when routes are added, removed or changed.
      *
      * @return void
      */
     public function check()
     {
         try {
+            $vendorFile = $this->patchEntry->getPath();
             $originalDefinitions = $this->patchEntry->getWebApiRestDefinitionsFromOriginalFile();
             $newDefinitions = $this->patchEntry->getWebApiRestDefinitionsFromNewFile();
 
@@ -43,6 +44,43 @@ class WebApiRestXml extends AbstractCheck
                     $this->infos[Checks::TYPE_WEBAPI_REST_ADDED][$label] = $label;
                 }
             }
+
+            $routeDefinitions = $this->m2->getWebApiRestRouteDefinitions();
+            foreach (Checks::$webApiRestTypes as $webApiRestType) {
+                if (empty($this->infos[$webApiRestType])) {
+                    continue;
+                }
+                foreach ($this->infos[$webApiRestType] as $identity) {
+                    $contributingFiles = $routeDefinitions[$identity] ?? [];
+                    $otherFiles = array_values(array_filter($contributingFiles, function ($file) use ($vendorFile) {
+                        return $file !== $vendorFile;
+                    }));
+
+                    if (!str_starts_with($vendorFile, 'vendor/magento/') && !empty($otherFiles)) {
+                        foreach ($otherFiles as $otherFile) {
+                            $this->warnings[$webApiRestType][] = "$otherFile ($identity)";
+                        }
+                        unset($this->infos[$webApiRestType][$identity]);
+                        continue;
+                    }
+
+                    if (!str_starts_with($vendorFile, 'vendor/magento/')) {
+                        continue;
+                    }
+                    foreach ($otherFiles as $otherFile) {
+                        if (str_starts_with($otherFile, 'vendor/magento/')) {
+                            continue;
+                        }
+                        $this->warnings[Checks::TYPE_WEBAPI_REST_TARGET_CHANGED][] = "$otherFile ($identity)";
+                    }
+                }
+            }
+            foreach (Checks::$webApiRestTypes as $webApiRestType) {
+                if (empty($this->infos[$webApiRestType])) {
+                    unset($this->infos[$webApiRestType]);
+                }
+            }
+            unset($webApiRestType, $identity, $contributingFiles, $otherFiles, $otherFile);
         } catch (\Throwable $throwable) {
             throw new \InvalidArgumentException('etc/webapi.xml not parseable: ' . $throwable->getMessage());
         }

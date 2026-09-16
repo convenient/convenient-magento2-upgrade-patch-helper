@@ -12,6 +12,10 @@
 - [WARN - DB schema removed](#warn---db-schema-removed)
 - [WARN - DB schema changed](#warn---db-schema-changed)
 - [WARN - DB schema target changed](#warn---db-schema-target-changed)
+- [WARN - REST WebAPI added](#warn---rest-webapi-added)
+- [WARN - REST WebAPI removed](#warn---rest-webapi-removed)
+- [WARN - REST WebAPI changed](#warn---rest-webapi-changed)
+- [WARN - REST WebAPI target changed](#warn---rest-webapi-target-changed)
 - [INFO - Queue consumer added](#info---queue-consumer-added)
 - [INFO - Queue consumer removed](#info---queue-consumer-removed)
 - [INFO - Queue consumer changed](#info---queue-consumer-changed)
@@ -254,6 +258,166 @@ Your project has `app/code/Ampersand/Test/etc/db_schema.xml` which makes changes
 During a magento upgrade the core `vendor/magento/module-wishlist/etc/db_schema.xml` make changes to `wishlist_item`. 
 
 You now have a possible issue where the third party custom code may be conflicting with the core definition. Review the changes in the main definition alongside your customisation to see if it is still compatible or necessary.
+
+## WARN - REST WebAPI added
+
+A third-party `webapi.xml` route has been added.
+
+This is promoted from an `INFO` to a `WARN` because this non-core Magento module adds a route declaration whose HTTP method and URL are also declared in a different `webapi.xml`. Magento merges those declarations into one effective route configuration, so the addition may affect that combined route.
+
+Example:
+
+```
++-------+-------------------+----------------------------------------+-----------------------------------------------------------+
+| Level | Type              | File                                   | To Check                                                  |
++-------+-------------------+----------------------------------------+-----------------------------------------------------------+
+| WARN  | REST WebAPI added | vendor/example/module-a/etc/webapi.xml | vendor/example/module-b/etc/webapi.xml (POST /V1/example) |
++-------+-------------------+----------------------------------------+-----------------------------------------------------------+
+```
+
+A new route in `vendor/example/module-a/etc/webapi.xml` has the same `POST /V1/example` identity as `vendor/example/module-b/etc/webapi.xml`. Magento merges those declarations into one route configuration.
+
+For example, this upgraded-side addition produces the source change; the other module's matching `POST /V1/example` declaration is unchanged:
+
+```diff
+--- vendor_orig/example/module-a/etc/webapi.xml
++++ vendor/example/module-a/etc/webapi.xml
+@@ -8,4 +8,9 @@
++    <route url="/V1/example" method="POST">
++        <service class="Ampersand\\Example\\Api\\ExampleInterface" method="save"/>
++        <resources><resource ref="anonymous"/></resources>
++    </route>
+ </routes>
+```
+
+The existing contributor is `vendor/example/module-b/etc/webapi.xml`:
+
+```xml
+<route url="/V1/example" method="POST">
+    <service class="Example\ModuleB\Api\ExampleInterface" method="save"/>
+    <resources><resource ref="anonymous"/></resources>
+</route>
+```
+
+You may want to review the combined route declaration and verify that its service mapping, authorization, and request data are compatible.
+
+## WARN - REST WebAPI removed
+
+A third-party `webapi.xml` route has been removed.
+
+This is promoted from an `INFO` to a `WARN` because this non-core Magento module removes a route declaration whose HTTP method and URL are also declared in a different `webapi.xml`. Magento merged those declarations into one effective route configuration, so the removal may affect the route that remains.
+
+Example:
+
+```
++-------+---------------------+------------------------------------------+----------------------------------------------------------------+
+| Level | Type                | File                                     | To Check                                                       |
++-------+---------------------+------------------------------------------+----------------------------------------------------------------+
+| WARN  | REST WebAPI removed | vendor/example/module-foo/etc/webapi.xml | vendor/example/module-bar/etc/webapi.xml (GET /V1/example/:id) |
++-------+---------------------+------------------------------------------+----------------------------------------------------------------+
+```
+
+A route removed from `vendor/example/module-foo/etc/webapi.xml` previously had the same `GET /V1/example/:id` identity as `vendor/example/module-bar/etc/webapi.xml`. Magento merged those declarations into one route configuration.
+
+For example, this upgraded-side removal produces the source change; another module still declares `GET /V1/example/:id`:
+
+```diff
+--- vendor_orig/example/module-foo/etc/webapi.xml
++++ vendor/example/module-foo/etc/webapi.xml
+@@ -8,4 +8,0 @@
+-    <route url="/V1/example/:id" method="GET">
+-        <service class="Example\\Foo\\Api\\ExampleInterface" method="get"/>
+-        <resources><resource ref="anonymous"/></resources>
+-    </route>
+```
+
+The remaining contributor is `vendor/example/module-bar/etc/webapi.xml`:
+
+```xml
+<route url="/V1/example/:id" method="GET">
+    <service class="Example\Bar\Api\ExampleInterface" method="get"/>
+    <resources><resource ref="anonymous"/></resources>
+</route>
+```
+
+You may want to review the remaining route declaration and verify the removal is intended and compatible.
+
+## WARN - REST WebAPI changed
+
+A third-party `webapi.xml` route has been changed.
+
+This is promoted from an `INFO` to a `WARN` because this non-core Magento module changes a route declaration whose HTTP method and URL are also declared in a different `webapi.xml`. Magento merges those declarations into one effective route configuration, so the change may affect that combined route.
+
+Example:
+
+```
++-------+---------------------+------------------------------------------+----------------------------------------------------------------+
+| Level | Type                | File                                     | To Check                                                       |
++-------+---------------------+------------------------------------------+----------------------------------------------------------------+
+| WARN  | REST WebAPI changed | vendor/example/module-foo/etc/webapi.xml | vendor/example/module-bar/etc/webapi.xml (GET /V1/example/:id) |
++-------+---------------------+------------------------------------------+----------------------------------------------------------------+
+```
+
+A route in `vendor/example/module-foo/etc/webapi.xml` changed while `vendor/example/module-bar/etc/webapi.xml`, a separate third-party module, declares the same `GET /V1/example/:id` identity. Magento merges those declarations into one route configuration.
+
+For example, this upgraded-side declaration change produces the source change; `vendor/example/module-bar/etc/webapi.xml` still contributes the same route identity:
+
+```diff
+--- vendor_orig/example/module-foo/etc/webapi.xml
++++ vendor/example/module-foo/etc/webapi.xml
+@@ -8,1 +8,1 @@
+-    <route url="/V1/example/:id" method="GET">
++    <route url="/V1/example/:id" method="GET" secure="true">
+```
+
+The unchanged contributor is `vendor/example/module-bar/etc/webapi.xml`:
+
+```xml
+<route url="/V1/example/:id" method="GET">
+    <service class="Example\Bar\Api\ExampleInterface" method="get"/>
+    <resources><resource ref="anonymous"/></resources>
+</route>
+```
+
+You may want to review the combined route declaration and verify that its service mapping, authorization, and request data remain compatible.
+
+## WARN - REST WebAPI target changed
+
+A Magento route was added, removed, or changed while a third-party `webapi.xml` contributes to the same route.
+
+Example:
+
+```
++-------+----------------------------+--------------------------------------------+------------------------------------------------------------------+
+| Level | Type                       | File                                       | To Check                                                         |
++-------+----------------------------+--------------------------------------------+------------------------------------------------------------------+
+| WARN  | REST WebAPI target changed | vendor/magento/module-store/etc/webapi.xml | app/code/Vendor/Module/etc/webapi.xml (GET /V1/store/storeViews) |
++-------+----------------------------+--------------------------------------------+------------------------------------------------------------------+
+```
+
+Your project has `app/code/Vendor/Module/etc/webapi.xml`, which contributes to `GET /V1/store/storeViews` alongside Magento's route declaration.
+
+During the upgrade `vendor/magento/module-store/etc/webapi.xml` changed that route. Magento merges both declarations, so the core change may conflict with or be affected by the third-party contribution.
+
+For example, this core change produces the source change while the app-code declaration remains in place:
+
+```diff
+--- vendor_orig/magento/module-store/etc/webapi.xml
++++ vendor/magento/module-store/etc/webapi.xml
+@@ -42,1 +42,1 @@
+-    <route url="/V1/store/storeViews" method="GET">
++    <route url="/V1/store/storeViews" method="GET" secure="true">
+```
+
+```xml
+<!-- app/code/Vendor/Module/etc/webapi.xml (unchanged) -->
+<route url="/V1/store/storeViews" method="GET">
+    <service class="Vendor\Module\Api\StoreViewInterface" method="getList"/>
+    <resources><resource ref="anonymous"/></resources>
+</route>
+```
+
+Review the Magento change alongside the third-party declaration to verify it is still compatible or necessary.
 
 ## INFO - Queue consumer added	    
 A queue consumer has been added. 

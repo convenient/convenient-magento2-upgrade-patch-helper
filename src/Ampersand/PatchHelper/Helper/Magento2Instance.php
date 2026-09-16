@@ -2,6 +2,7 @@
 
 namespace Ampersand\PatchHelper\Helper;
 
+use Ampersand\PatchHelper\Patchfile\Entry\WebApiRestDefinitions;
 use Ampersand\PatchHelper\Patchfile\Sanitiser;
 use Magento\Framework\App\Area;
 use Magento\Framework\App\Config\ScopeConfigInterface;
@@ -57,6 +58,9 @@ class Magento2Instance
 
     /** @var  array<string, string> */
     private $dbSchemaPrimaryDefinition = [];
+
+    /** @var array<string, array<int, string>> */
+    private $webApiRestRouteDefinitions = [];
 
     /** @var  array<string, array<string, mixed>> */
     private $areaConfig = [];
@@ -120,6 +124,11 @@ class Magento2Instance
         $this->listHtmlFiles([$dirList->getPath('app'), $dirList->getRoot() . '/vendor']);
         try {
             $this->prepareDbSchemaXmlData();
+        } catch (\Throwable $throwable) {
+            $this->bootErrors[] = $throwable;
+        }
+        try {
+            $this->prepareWebApiRestXmlData();
         } catch (\Throwable $throwable) {
             $this->bootErrors[] = $throwable;
         }
@@ -474,6 +483,51 @@ class Magento2Instance
     public function getDbSchemaThirdPartyAlteration()
     {
         return $this->dbSchemaThirdPartyAlteration;
+    }
+
+    /**
+     * @return array<string, array<int, string>>
+     */
+    public function getWebApiRestRouteDefinitions()
+    {
+        return $this->webApiRestRouteDefinitions;
+    }
+
+    /**
+     * Prepare a map of REST route identities to every webapi.xml that contributes to them.
+     *
+     * @return void
+     */
+    private function prepareWebApiRestXmlData()
+    {
+        $rootDir = $this->objectManager->get(DirectoryList::class)->getRoot();
+        $webApiFiles = array_unique(array_filter($this->getListOfXmlFiles(), function ($potentialWebApi) {
+            if (!str_ends_with($potentialWebApi, '/etc/webapi.xml')) {
+                return false;
+            }
+            foreach (['/tests/', '/dev/tools/'] as $dir) {
+                if (str_contains($potentialWebApi, $dir)) {
+                    return false;
+                }
+            }
+            return true;
+        }));
+
+        $webApiRestDefinitions = new WebApiRestDefinitions('');
+        foreach ($webApiFiles as $webApiFile) {
+            $relativeFile = sanitize_filepath($rootDir, $webApiFile);
+            foreach ($webApiRestDefinitions->getDefinitionsFromFilepath($webApiFile) as $identity => $definition) {
+                $this->webApiRestRouteDefinitions[$identity][] = $relativeFile;
+            }
+        }
+        unset($webApiRestDefinitions, $webApiFile, $relativeFile, $identity, $definition);
+
+        ksort($this->webApiRestRouteDefinitions);
+        foreach ($this->webApiRestRouteDefinitions as &$files) {
+            $files = array_values(array_unique($files));
+            sort($files);
+        }
+        unset($files);
     }
 
     /**

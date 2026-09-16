@@ -5,6 +5,7 @@
         <sequence>
             <module name="Ampersand_TestVendor"/>
             <module name="Magento_AdvancedPricing"/>
+            <module name="Magento_Store"/>
             <module name="Magento_Theme"/>
         </sequence>
     </module>

@@ -1,0 +1,1 @@
+<routes><route url="/V1/third-party-changed" method="GET" secure="true"><service class="Vendor\Api\ExampleInterface" method="changed"/></route></routes>

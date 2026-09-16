@@ -11,11 +11,18 @@ class WebApiRestXmlTest extends \PHPUnit\Framework\TestCase
     /** @var Magento2Instance|\PHPUnit\Framework\MockObject\MockObject */
     private $m2;
 
+    /** @var array<string, array<int, string>> */
+    private $routeDefinitions = [];
+
     protected function setUp(): void
     {
         $this->m2 = $this->getMockBuilder(Magento2Instance::class)
             ->disableOriginalConstructor()
             ->getMock();
+        $this->m2->method('getWebApiRestRouteDefinitions')
+            ->willReturnCallback(function () {
+                return $this->routeDefinitions;
+            });
     }
 
     public function testRoutesAreAddedRemovedAndChanged()
@@ -93,6 +100,193 @@ class WebApiRestXmlTest extends \PHPUnit\Framework\TestCase
         );
     }
 
+    public function testThirdPartyRouteSharedWithMagentoIsPromotedToWarning()
+    {
+        $this->routeDefinitions = [
+            'GET /V1/shared' => [
+                'app/code/Vendor/Module/etc/webapi.xml',
+                'vendor/magento/module-shared/etc/webapi.xml'
+            ]
+        ];
+
+        [$warnings, $infos] = $this->runCheck(
+            'app/code/Vendor/Module/etc/webapi.xml',
+            'vendor_orig/app/code/Vendor/Module/etc/webapi.xml'
+        );
+
+        $this->assertSame(
+            ['REST WebAPI changed' => ['vendor/magento/module-shared/etc/webapi.xml (GET /V1/shared)']],
+            $warnings
+        );
+        $this->assertSame([], $infos);
+    }
+
+    public function testThirdPartyRouteSharedWithAnotherThirdPartyIsPromotedToWarning()
+    {
+        $this->routeDefinitions = [
+            'GET /V1/shared' => [
+                'app/code/Vendor/Module/etc/webapi.xml',
+                'vendor/example/module-shared/etc/webapi.xml'
+            ]
+        ];
+
+        [$warnings, $infos] = $this->runCheck(
+            'app/code/Vendor/Module/etc/webapi.xml',
+            'vendor_orig/app/code/Vendor/Module/etc/webapi.xml'
+        );
+
+        $this->assertSame(
+            ['REST WebAPI changed' => ['vendor/example/module-shared/etc/webapi.xml (GET /V1/shared)']],
+            $warnings
+        );
+        $this->assertSame([], $infos);
+    }
+
+    public function testThirdPartyAddedRouteSharedWithAnotherThirdPartyIsPromotedToWarning()
+    {
+        $this->routeDefinitions = [
+            'POST /V1/third-party-added' => [
+                'vendor/example/module-contributor/etc/webapi.xml',
+                'vendor/example/module-third-party-added/etc/webapi.xml'
+            ]
+        ];
+
+        [$warnings, $infos] = $this->runCheck(
+            'vendor/example/module-third-party-added/etc/webapi.xml',
+            'vendor_orig/example/module-third-party-added/etc/webapi.xml'
+        );
+
+        $this->assertSame(
+            ['REST WebAPI added' => ['vendor/example/module-contributor/etc/webapi.xml (POST /V1/third-party-added)']],
+            $warnings
+        );
+        $this->assertSame([], $infos);
+    }
+
+    public function testThirdPartyRemovedRouteSharedWithAnotherThirdPartyIsPromotedToWarning()
+    {
+        $this->routeDefinitions = [
+            'GET /V1/third-party-removed' => [
+                'vendor/example/module-contributor/etc/webapi.xml'
+            ]
+        ];
+
+        [$warnings, $infos] = $this->runCheck(
+            'vendor/example/module-third-party-removed/etc/webapi.xml',
+            'vendor_orig/example/module-third-party-removed/etc/webapi.xml'
+        );
+
+        $this->assertSame(
+            ['REST WebAPI removed' => ['vendor/example/module-contributor/etc/webapi.xml (GET /V1/third-party-removed)']],
+            $warnings
+        );
+        $this->assertSame([], $infos);
+    }
+
+    public function testThirdPartyChangedRouteSharedWithAnotherThirdPartyIsPromotedToWarning()
+    {
+        $this->routeDefinitions = [
+            'GET /V1/third-party-changed' => [
+                'vendor/example/module-contributor/etc/webapi.xml',
+                'vendor/example/module-third-party-changed/etc/webapi.xml'
+            ]
+        ];
+
+        [$warnings, $infos] = $this->runCheck(
+            'vendor/example/module-third-party-changed/etc/webapi.xml',
+            'vendor_orig/example/module-third-party-changed/etc/webapi.xml'
+        );
+
+        $this->assertSame(
+            ['REST WebAPI changed' => ['vendor/example/module-contributor/etc/webapi.xml (GET /V1/third-party-changed)']],
+            $warnings
+        );
+        $this->assertSame([], $infos);
+    }
+
+    public function testMagentoRouteSharedWithMagentoRemainsInfo()
+    {
+        $this->routeDefinitions = [
+            'GET /V1/secure' => [
+                'vendor/magento/module-other/etc/webapi.xml',
+                'vendor/magento/module-sample/etc/webapi.xml'
+            ]
+        ];
+
+        [$warnings, $infos] = $this->runCheck(
+            'vendor/magento/module-sample/etc/webapi.xml',
+            'vendor_orig/magento/module-sample/etc/webapi.xml'
+        );
+
+        $this->assertSame([], $warnings);
+        $this->assertSame('GET /V1/secure', $infos['REST WebAPI changed']['GET /V1/secure']);
+    }
+
+    public function testMagentoRouteSharedWithThirdPartyGetsTargetWarning()
+    {
+        $this->routeDefinitions = [
+            'GET /V1/secure' => [
+                'app/code/Vendor/Module/etc/webapi.xml',
+                'vendor/magento/module-sample/etc/webapi.xml'
+            ]
+        ];
+
+        [$warnings, $infos] = $this->runCheck(
+            'vendor/magento/module-sample/etc/webapi.xml',
+            'vendor_orig/magento/module-sample/etc/webapi.xml'
+        );
+
+        $this->assertSame(
+            ['REST WebAPI target changed' => ['app/code/Vendor/Module/etc/webapi.xml (GET /V1/secure)']],
+            $warnings
+        );
+        $this->assertSame('GET /V1/secure', $infos['REST WebAPI changed']['GET /V1/secure']);
+    }
+
+    public function testMagentoAddedRouteSharedWithThirdPartyGetsTargetWarning()
+    {
+        $this->routeDefinitions = [
+            'GET /V1/added-file' => [
+                'app/code/Vendor/Module/etc/webapi.xml',
+                'vendor/magento/module-added/etc/webapi.xml'
+            ],
+        ];
+
+        [$addedWarnings, $infos] = $this->runCheck(
+            'vendor/magento/module-added/etc/webapi.xml',
+            'vendor_orig/magento/module-added/etc/webapi.xml'
+        );
+        $this->assertSame(
+            ['REST WebAPI target changed' => ['app/code/Vendor/Module/etc/webapi.xml (GET /V1/added-file)']],
+            $addedWarnings
+        );
+        $this->assertSame(
+            ['REST WebAPI added' => ['GET /V1/added-file' => 'GET /V1/added-file']],
+            $infos
+        );
+    }
+
+    public function testMagentoRemovedRouteSharedWithThirdPartyGetsTargetWarning()
+    {
+        $this->routeDefinitions = [
+            'DELETE /V1/removed-file' => ['app/code/Vendor/Module/etc/webapi.xml']
+        ];
+
+        [$warnings, $infos] = $this->runCheck(
+            'vendor/magento/module-removed/etc/webapi.xml',
+            'vendor_orig/magento/module-removed/etc/webapi.xml'
+        );
+
+        $this->assertSame(
+            ['REST WebAPI target changed' => ['app/code/Vendor/Module/etc/webapi.xml (DELETE /V1/removed-file)']],
+            $warnings
+        );
+        $this->assertSame(
+            ['REST WebAPI removed' => ['DELETE /V1/removed-file' => 'DELETE /V1/removed-file']],
+            $infos
+        );
+    }
+
     public function testMalformedWebApiXmlHasContextualError()
     {
         $entry = new Entry(
@@ -140,5 +334,20 @@ class WebApiRestXmlTest extends \PHPUnit\Framework\TestCase
         $this->assertSame([], $ignored);
 
         return $infos;
+    }
+
+    /**
+     * @return array{array<string, array<int|string, string>>, array<string, array<string, string>>}
+     */
+    private function runCheck(string $newFile, string $originalFile): array
+    {
+        $entry = new Entry($this->testResourcesDir, $newFile, $originalFile);
+        $warnings = $infos = $ignored = [];
+        $check = new WebApiRestXml($this->m2, $entry, '', $warnings, $infos, $ignored);
+
+        $check->check();
+        $this->assertSame([], $ignored);
+
+        return [$warnings, $infos];
     }
 }

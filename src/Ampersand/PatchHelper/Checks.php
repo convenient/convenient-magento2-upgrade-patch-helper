@@ -18,6 +18,7 @@ class Checks
     public const TYPE_WEBAPI_REST_ADDED = 'REST WebAPI added';
     public const TYPE_WEBAPI_REST_REMOVED = 'REST WebAPI removed';
     public const TYPE_WEBAPI_REST_CHANGED = 'REST WebAPI changed';
+    public const TYPE_WEBAPI_REST_TARGET_CHANGED = 'REST WebAPI target changed';
     public const TYPE_GRAPHQL_QUERY_ADDED = 'GraphQL Query added';
     public const TYPE_GRAPHQL_QUERY_REMOVED = 'GraphQL Query removed';
     public const TYPE_GRAPHQL_QUERY_CHANGED = 'GraphQL Query changed';
@@ -45,6 +46,15 @@ class Checks
         self::TYPE_DB_SCHEMA_CHANGED,
         self::TYPE_DB_SCHEMA_REMOVED,
         self::TYPE_DB_SCHEMA_TARGET_CHANGED
+    ];
+
+    /**
+     * @var string[]
+     */
+    public static $webApiRestTypes = [
+        self::TYPE_WEBAPI_REST_ADDED,
+        self::TYPE_WEBAPI_REST_CHANGED,
+        self::TYPE_WEBAPI_REST_REMOVED
     ];
 
     /**
