@@ -2,6 +2,13 @@
 <?php
 require_once __DIR__ . '/../vendor/autoload.php';
 
+$earlyBootstrapWarning = Ampersand\PatchHelper\Service\MagentoProjectAutoloader::registerFromCommandArguments(
+    $_SERVER['argv'] ?? []
+);
+if ($earlyBootstrapWarning !== null) {
+    fwrite(STDERR, $earlyBootstrapWarning . PHP_EOL);
+}
+
 use Symfony\Component\Console\Application;
 
 $currentMemoryLimit = ini_get('memory_limit');

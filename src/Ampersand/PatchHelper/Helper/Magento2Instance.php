@@ -84,7 +84,7 @@ class Magento2Instance
      */
     public function __construct(string $path)
     {
-        require rtrim($path, '/') . '/app/bootstrap.php';
+        require_once rtrim($path, '/') . '/app/bootstrap.php';
 
         /** @var \Magento\Framework\App\Bootstrap $bootstrap */
         $bootstrap = \Magento\Framework\App\Bootstrap::create(BP, $_SERVER);

@@ -28,70 +28,30 @@ class AnalyseCommand extends Command
     protected function configure()
     {
         $this
-            ->setName('analyse')
+            ->setName(AnalyseCommandDefinition::getAnalyseCommandName())
             ->addArgument(
-                'project',
+                AnalyseCommandDefinition::getProjectArgumentName(),
                 InputArgument::REQUIRED,
-                'The path to the magento2 project'
-            )
-            ->addOption(
-                'auto-theme-update',
-                'a',
-                InputOption::VALUE_OPTIONAL,
-                'Fuzz factor for automatically applying changes to local theme'
-            )
-            ->addOption(
-                'sort-by-type',
-                null,
-                InputOption::VALUE_NONE,
-                'Sort the output by override type'
-            )
-            ->addOption(
-                'phpstorm-threeway-diff-commands',
-                null,
-                InputOption::VALUE_NONE,
-                'Output phpstorm threeway diff commands'
-            )
-            ->addOption(
-                'vendor-namespaces',
-                null,
-                InputOption::VALUE_OPTIONAL,
-                'Only show custom modules with these namespaces (comma separated list)'
-            )
-            ->addOption(
-                'filter',
-                null,
-                InputOption::VALUE_REQUIRED,
-                'Filter the patchfile for entries containing this phrase, used during tool development'
-            )
-            ->addOption(
-                'pad-table-columns',
-                null,
-                InputOption::VALUE_REQUIRED,
-                'Pad the table column width'
-            )
-            ->addOption(
-                'php-strict-errors',
-                null,
-                InputOption::VALUE_NONE,
-                'Any php errors/warnings/notices will throw an exception'
-            )
-            ->addOption(
-                'show-info',
-                null,
-                InputOption::VALUE_NONE,
-                'Show all INFO level reports'
-            )
-            ->addOption(
-                'show-ignore',
-                null,
-                InputOption::VALUE_NONE,
-                'Show all IGNORE level reports'
-            )
-            ->setDescription('Analyse a magento2 project which has had a ./vendor.patch file manually created');
+                AnalyseCommandDefinition::getProjectArgumentDescription()
+            );
+
+        foreach (AnalyseCommandDefinition::getAnalyseOptions() as $option) {
+            $this->addOption(
+                $option['name'],
+                $option['shortcut'],
+                AnalyseCommandDefinition::optionRequiresValue($option['valueMode'])
+                    ? InputOption::VALUE_REQUIRED
+                    : (AnalyseCommandDefinition::optionAcceptsValue($option['valueMode'])
+                        ? InputOption::VALUE_OPTIONAL
+                        : InputOption::VALUE_NONE),
+                $option['description']
+            );
+        }
+
+        $this->setDescription('Analyse a magento2 project which has had a ./vendor.patch file manually created');
     }
 
-    protected function execute(InputInterface $input, Output $output)
+    protected function execute(InputInterface $input, Output $output): int
     {
         $exitCode = 0;
         if ($input->getOption('php-strict-errors')) {
@@ -132,9 +92,6 @@ class AnalyseCommand extends Command
         if ($output instanceof \Symfony\Component\Console\Output\ConsoleOutputInterface) {
             $errOutput = $output->getErrorOutput();
         }
-
-        // Do not use any more symfony/console classes after this point unless they are included in this function
-        $this->symfonyConsoleCompatability($output);
 
         $magento2 = new Helper\Magento2Instance($projectDir);
         foreach ($magento2->getBootErrors() as $bootError) {
@@ -365,29 +322,5 @@ class AnalyseCommand extends Command
 
         file_put_contents($newPatchFilePath, implode(PHP_EOL, $patchFilesToOutput));
         return $exitCode;
-    }
-
-    /**
-     * Magento 2.4.6 requires symfony/console ^5.0. previously only as high as ^4.0
-     *
-     * The vendor/autoload.php of this module will load a lot of the symfony/console files from this module, and
-     * anything additional that is autoloaded after the magento project is bootstrapped will come from the projects
-     * version of symfony/console.
-     *
-     * When these two versions mismatch you can get odd behaviour.
-     *
-     * We stub in an empty / fake table render to ensure all the classes required to render the table are loaded from
-     * this tools vendor, rather than the projects vendor
-     *
-     * If we need to utilise any other symfony console functionality we can do so by eager loading it here.
-     *
-     * @return void
-     */
-    private function symfonyConsoleCompatability(Output $output)
-    {
-        $outputTable = new Table($output);
-        $outputTable->setHeaders([]);
-        $outputTable->addRows([]);
-        $outputTable->render();
     }
 }
