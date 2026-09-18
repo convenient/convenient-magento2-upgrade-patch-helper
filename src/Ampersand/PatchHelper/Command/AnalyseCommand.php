@@ -97,12 +97,11 @@ class AnalyseCommand extends Command
         foreach ($magento2->getBootErrors() as $bootError) {
             $errOutput->writeln(
                 sprintf(
-                    '<error>Magento boot error, could not work out db schema files: %s %s</error>',
+                    '<error>Magento boot error, could not handle files: %s %s</error>',
                     $bootError->getMessage(),
                     PHP_EOL . $bootError->getTraceAsString() . PHP_EOL
                 )
             );
-            $exitCode = 2;
         }
         $output->writeln('<info>Magento has been instantiated</info>', Output::VERBOSITY_VERBOSE);
         $patchFile = new Patchfile\Reader($patchDiffFilePath);

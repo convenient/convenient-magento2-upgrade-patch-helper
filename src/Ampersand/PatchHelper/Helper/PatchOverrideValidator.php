@@ -81,7 +81,22 @@ class PatchOverrideValidator
             Checks::TYPE_DB_SCHEMA_ADDED => [],
             Checks::TYPE_DB_SCHEMA_REMOVED => [],
             Checks::TYPE_DB_SCHEMA_CHANGED => [],
-            Checks::TYPE_DB_SCHEMA_TARGET_CHANGED => []
+            Checks::TYPE_DB_SCHEMA_TARGET_CHANGED => [],
+            Checks::TYPE_GRAPHQL_QUERY_TARGET_CHANGED => [],
+            Checks::TYPE_GRAPHQL_MUTATION_TARGET_CHANGED => [],
+            Checks::TYPE_REDUNDANT_OVERRIDE => [],
+            Checks::TYPE_WEBAPI_REST_ADDED => [],
+            Checks::TYPE_WEBAPI_REST_CHANGED => [],
+            Checks::TYPE_WEBAPI_REST_REMOVED => [],
+            Checks::TYPE_WEBAPI_REST_TARGET_CHANGED => [],
+            Checks::TYPE_GRAPHQL_QUERY_ADDED => [],
+            Checks::TYPE_GRAPHQL_QUERY_CHANGED => [],
+            Checks::TYPE_GRAPHQL_QUERY_REMOVED => [],
+            Checks::TYPE_GRAPHQL_MUTATION_ADDED => [],
+            Checks::TYPE_GRAPHQL_MUTATION_CHANGED => [],
+            Checks::TYPE_GRAPHQL_MUTATION_REMOVED => [],
+            Checks::TYPE_METHOD_PLUGIN_DISABLED => [],
+            Checks::TYPE_METHOD_PLUGIN_ENABLED => []
         ];
         $this->ignored = $this->warnings; // Any warning can be ignored
         $this->infos = [

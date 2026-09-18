@@ -142,6 +142,8 @@ cp vendor/ampersand/upgrade-patch-helper-test-module/src/module/etc/db_schema.af
 cp vendor/ampersand/upgrade-patch-helper-test-module/src/module/etc/webapi.after.xml vendor/ampersand/upgrade-patch-helper-test-module/src/module/etc/webapi.xml
 sed -i '0,/<route url="\/V1\/store\/storeViews" method="GET">/s//<route url="\/V1\/store\/storeViews" method="GET" secure="true">/' vendor/magento/module-store/etc/webapi.xml
 cp vendor/ampersand/upgrade-patch-helper-test-module/src/module/etc/schema.after.graphqls vendor/ampersand/upgrade-patch-helper-test-module/src/module/etc/schema.graphqls
+sed -i '0,/storeConfig : StoreConfig /s//storeConfig : StoreConfig! /' vendor/magento/module-store-graph-ql/etc/schema.graphqls
+sed -i '0,/): CustomerToken @resolver/s//): CustomerToken! @resolver/' vendor/magento/module-customer-graph-ql/etc/schema.graphqls
 rm vendor/ampersand/upgrade-patch-helper-test-module-to-be-removed/src/module/etc/db_schema.xml
 cp vendor/ampersand/upgrade-patch-helper-test-module/src/module/etc/adminhtml/system/functional.after.xml vendor/ampersand/upgrade-patch-helper-test-module/src/module/etc/adminhtml/system/functional.xml
 

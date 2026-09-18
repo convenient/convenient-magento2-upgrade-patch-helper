@@ -16,6 +16,14 @@
 - [WARN - REST WebAPI removed](#warn---rest-webapi-removed)
 - [WARN - REST WebAPI changed](#warn---rest-webapi-changed)
 - [WARN - REST WebAPI target changed](#warn---rest-webapi-target-changed)
+- [WARN - GraphQL Query added](#warn---graphql-query-added)
+- [WARN - GraphQL Query removed](#warn---graphql-query-removed)
+- [WARN - GraphQL Query changed](#warn---graphql-query-changed)
+- [WARN - GraphQL Query target changed](#warn---graphql-query-target-changed)
+- [WARN - GraphQL Mutation added](#warn---graphql-mutation-added)
+- [WARN - GraphQL Mutation removed](#warn---graphql-mutation-removed)
+- [WARN - GraphQL Mutation changed](#warn---graphql-mutation-changed)
+- [WARN - GraphQL Mutation target changed](#warn---graphql-mutation-target-changed)
 - [INFO - Queue consumer added](#info---queue-consumer-added)
 - [INFO - Queue consumer removed](#info---queue-consumer-removed)
 - [INFO - Queue consumer changed](#info---queue-consumer-changed)
@@ -418,6 +426,270 @@ For example, this core change produces the source change while the app-code decl
 ```
 
 Review the Magento change alongside the third-party declaration to verify it is still compatible or necessary.
+
+## WARN - GraphQL Query added
+
+A `Query` field in a third-party `schema.graphqls` file has been added.
+
+This is promoted from an `INFO` to a `WARN` because another `schema.graphqls` file defines the same `Query` field.
+
+Example:
+```
++-------+---------------------+------------------------------------------------+------------------------------------------------------------------------------+
+| Level | Type                | File                                           | To Check                                                                     |
++-------+---------------------+------------------------------------------------+------------------------------------------------------------------------------+
+| WARN  | GraphQL Query added | vendor/acme/module-loyalty/etc/schema.graphqls | app/code/Acme/LoyaltyCustomization/etc/schema.graphqls (Query loyaltyPoints) |
++-------+---------------------+------------------------------------------------+------------------------------------------------------------------------------+
+```
+
+A new `Query loyaltyPoints` field in `vendor/acme/module-loyalty/etc/schema.graphqls` matches the project customisation in `app/code/Acme/LoyaltyCustomization/etc/schema.graphqls`:
+
+```diff
+--- vendor_orig/acme/module-loyalty/etc/schema.graphqls
++++ vendor/acme/module-loyalty/etc/schema.graphqls
+ type Query {
++    loyaltyPoints: LoyaltyPoints @resolver(class: "Acme\\Loyalty\\Model\\Resolver\\LoyaltyPoints")
+ }
+```
+
+```graphql
+# app/code/Acme/LoyaltyCustomization/etc/schema.graphqls (unchanged)
+type Query {
+    loyaltyPoints: LoyaltyPoints @cache(cacheIdentity: "Acme\\LoyaltyCustomization\\Model\\LoyaltyPointsIdentity")
+}
+```
+
+Review both field definitions, including their resolver, arguments, return type/nullability, cache and directives. This check identifies matching field definitions; it does not calculate the final schema Magento exposes.
+
+## WARN - GraphQL Query removed
+
+A `Query` field in a third-party `schema.graphqls` file has been removed.
+
+This is promoted from an `INFO` to a `WARN` because another `schema.graphqls` file still defines the same `Query` field.
+
+Example:
+```
++-------+-----------------------+------------------------------------------------------------+-----------------------------------------------------------------------------------------+
+| Level | Type                  | File                                                       | To Check                                                                                |
++-------+-----------------------+------------------------------------------------------------+-----------------------------------------------------------------------------------------+
+| WARN  | GraphQL Query removed | vendor/example/module-customer-support/etc/schema.graphqls | app/code/Example/CustomerSupportCustomization/etc/schema.graphqls (Query customerNotes) |
++-------+-----------------------+------------------------------------------------------------+-----------------------------------------------------------------------------------------+
+```
+
+```diff
+--- vendor_orig/example/module-customer-support/etc/schema.graphqls
++++ vendor/example/module-customer-support/etc/schema.graphqls
+ type Query {
+-    customerNotes: [CustomerNote!]! @resolver(class: "Example\\CustomerSupport\\Model\\Resolver\\CustomerNotes")
+ }
+```
+
+The removed `Query customerNotes` field in `vendor/example/module-customer-support/etc/schema.graphqls` previously matched the project customisation in `app/code/Example/CustomerSupportCustomization/etc/schema.graphqls`:
+
+```graphql
+# app/code/Example/CustomerSupportCustomization/etc/schema.graphqls (unchanged)
+type Query {
+    customerNotes: [CustomerNote!]! @resolver(class: "Example\\CustomerSupportCustomization\\Model\\Resolver\\CustomerNotes")
+}
+```
+
+Review the remaining field definition and verify that the removal is intended and compatible with its resolver, arguments and callers.
+
+## WARN - GraphQL Query changed
+
+A `Query` field in a third-party `schema.graphqls` file has been changed.
+
+This is promoted from an `INFO` to a `WARN` because another `schema.graphqls` file defines the same `Query` field.
+
+Example:
+```
++-------+-----------------------+----------------------------------------------------------+-----------------------------------------------------------------------------------------+
+| Level | Type                  | File                                                     | To Check                                                                                |
++-------+-----------------------+----------------------------------------------------------+-----------------------------------------------------------------------------------------+
+| WARN  | GraphQL Query changed | vendor/acme/module-customer-segments/etc/schema.graphqls | app/code/Acme/CustomerSegmentsCustomization/etc/schema.graphqls (Query customerSegment) |
++-------+-----------------------+----------------------------------------------------------+-----------------------------------------------------------------------------------------+
+```
+
+The changed `Query customerSegment` field in `vendor/acme/module-customer-segments/etc/schema.graphqls` switches resolver class while the project customisation in `app/code/Acme/CustomerSegmentsCustomization/etc/schema.graphqls` still defines the same field:
+
+```diff
+--- vendor_orig/acme/module-customer-segments/etc/schema.graphqls
++++ vendor/acme/module-customer-segments/etc/schema.graphqls
+-    customerSegment: CustomerSegment @resolver(class: "Acme\\CustomerSegments\\Model\\Resolver\\CustomerSegment")
++    customerSegment: CustomerSegment @resolver(class: "Acme\\CustomerSegments\\Model\\Resolver\\CustomerSegmentResolver")
+```
+
+```graphql
+# app/code/Acme/CustomerSegmentsCustomization/etc/schema.graphqls (unchanged)
+type Query {
+    customerSegment: CustomerSegment @resolver(class: "Acme\\CustomerSegmentsCustomization\\Model\\Resolver\\CustomerSegment")
+}
+```
+
+Review both resolver classes and the field's arguments, return type/nullability, cache and directives.
+
+## WARN - GraphQL Query target changed
+
+A Magento `Query` field has changed while a third-party `schema.graphqls` file defines the same field.
+
+Example:
+```
++-------+------------------------------+----------------------------------------------------------+----------------------------------------------------------------------------------+
+| Level | Type                         | File                                                     | To Check                                                                         |
++-------+------------------------------+----------------------------------------------------------+----------------------------------------------------------------------------------+
+| WARN  | GraphQL Query target changed | vendor/magento/module-store-graph-ql/etc/schema.graphqls | app/code/Vendor/StoreConfigCustomization/etc/schema.graphqls (Query storeConfig) |
++-------+------------------------------+----------------------------------------------------------+----------------------------------------------------------------------------------+
+```
+
+Your project has `app/code/Vendor/StoreConfigCustomization/etc/schema.graphqls`, which customises `Query storeConfig`:
+
+```diff
+--- vendor_orig/magento/module-store-graph-ql/etc/schema.graphqls
++++ vendor/magento/module-store-graph-ql/etc/schema.graphqls
+-    storeConfig : StoreConfig @resolver(class: "Magento\\StoreGraphQl\\Model\\Resolver\\StoreConfigResolver")
++    storeConfig : StoreConfig! @resolver(class: "Magento\\StoreGraphQl\\Model\\Resolver\\StoreConfigResolver")
+```
+
+```graphql
+# app/code/Vendor/StoreConfigCustomization/etc/schema.graphqls (unchanged)
+type Query {
+    storeConfig: StoreConfig @cache(cacheIdentity: "Vendor\\StoreConfigCustomization\\Model\\StoreConfigIdentity")
+}
+```
+
+During the upgrade `vendor/magento/module-store-graph-ql/etc/schema.graphqls` changed `Query storeConfig`. Review the Magento change alongside the third-party field definition to verify that it is still compatible or necessary. 
+
+## WARN - GraphQL Mutation added
+
+A `Mutation` field in a third-party `schema.graphqls` file has been added.
+
+This is promoted from an `INFO` to a `WARN` because another `schema.graphqls` file defines the same `Mutation` field.
+
+Example:
+```
++-------+------------------------+-----------------------------------------------------+--------------------------------------------------------------------------------------+
+| Level | Type                   | File                                                | To Check                                                                             |
++-------+------------------------+-----------------------------------------------------+--------------------------------------------------------------------------------------+
+| WARN  | GraphQL Mutation added | vendor/acme/module-gift-message/etc/schema.graphqls | app/code/Acme/GiftMessageCustomization/etc/schema.graphqls (Mutation addGiftMessage) |
++-------+------------------------+-----------------------------------------------------+--------------------------------------------------------------------------------------+
+```
+
+A new `Mutation addGiftMessage` field in `vendor/acme/module-gift-message/etc/schema.graphqls` matches the project customisation in `app/code/Acme/GiftMessageCustomization/etc/schema.graphqls`:
+
+```diff
+--- vendor_orig/acme/module-gift-message/etc/schema.graphqls
++++ vendor/acme/module-gift-message/etc/schema.graphqls
+ type Mutation {
++    addGiftMessage(input: GiftMessageInput!): GiftMessageOutput @resolver(class: "Acme\\GiftMessage\\Model\\Resolver\\AddGiftMessage")
+ }
+```
+
+```graphql
+# app/code/Acme/GiftMessageCustomization/etc/schema.graphqls (unchanged)
+type Mutation {
+    addGiftMessage(input: GiftMessageInput!): GiftMessageOutput @cache(cacheIdentity: "Acme\\GiftMessageCustomization\\Model\\GiftMessageIdentity")
+}
+```
+
+Review both field definitions, including their resolver, arguments, return type/nullability, cache, directives and callers.
+
+## WARN - GraphQL Mutation removed
+
+A `Mutation` field in a third-party `schema.graphqls` file has been removed.
+
+This is promoted from an `INFO` to a `WARN` because another `schema.graphqls` file still defines the same `Mutation` field.
+
+Example:
+```
++-------+--------------------------+---------------------------------------------------+----------------------------------------------------------------------------------------+
+| Level | Type                     | File                                              | To Check                                                                               |
++-------+--------------------------+---------------------------------------------------+----------------------------------------------------------------------------------------+
+| WARN  | GraphQL Mutation removed | vendor/example/module-rewards/etc/schema.graphqls | app/code/Example/RewardsCustomization/etc/schema.graphqls (Mutation applyRewardPoints) |
++-------+--------------------------+---------------------------------------------------+----------------------------------------------------------------------------------------+
+```
+
+The removed `Mutation applyRewardPoints` field in `vendor/example/module-rewards/etc/schema.graphqls` previously matched the project customisation in `app/code/Example/RewardsCustomization/etc/schema.graphqls`:
+
+```diff
+--- vendor_orig/example/module-rewards/etc/schema.graphqls
++++ vendor/example/module-rewards/etc/schema.graphqls
+ type Mutation {
+-    applyRewardPoints(input: ApplyRewardPointsInput!): RewardPointsOutput @resolver(class: "Example\\Rewards\\Model\\Resolver\\ApplyRewardPoints")
+ }
+```
+
+```graphql
+# app/code/Example/RewardsCustomization/etc/schema.graphqls (unchanged)
+type Mutation {
+    applyRewardPoints(input: ApplyRewardPointsInput!): RewardPointsOutput @resolver(class: "Example\\RewardsCustomization\\Model\\Resolver\\ApplyRewardPoints")
+}
+```
+
+Review the remaining field definition and verify that the removal is intended and compatible with its resolver, arguments and callers.
+
+## WARN - GraphQL Mutation changed
+
+A `Mutation` field in a third-party `schema.graphqls` file has been changed.
+
+This is promoted from an `INFO` to a `WARN` because another `schema.graphqls` file defines the same `Mutation` field.
+
+Example:
+```
++-------+--------------------------+-----------------------------------------------------+----------------------------------------------------------------------------------------+
+| Level | Type                     | File                                                | To Check                                                                               |
++-------+--------------------------+-----------------------------------------------------+----------------------------------------------------------------------------------------+
+| WARN  | GraphQL Mutation changed | vendor/acme/module-store-credit/etc/schema.graphqls | app/code/Acme/StoreCreditCustomization/etc/schema.graphqls (Mutation applyStoreCredit) |
++-------+--------------------------+-----------------------------------------------------+----------------------------------------------------------------------------------------+
+```
+
+The changed `Mutation applyStoreCredit` field in `vendor/acme/module-store-credit/etc/schema.graphqls` switches resolver class while the project customisation in `app/code/Acme/StoreCreditCustomization/etc/schema.graphqls` still defines the same field:
+
+```diff
+--- vendor_orig/acme/module-store-credit/etc/schema.graphqls
++++ vendor/acme/module-store-credit/etc/schema.graphqls
+-    applyStoreCredit(input: ApplyStoreCreditInput!): StoreCreditOutput @resolver(class: "Acme\\StoreCredit\\Model\\Resolver\\ApplyStoreCredit")
++    applyStoreCredit(input: ApplyStoreCreditInput!): StoreCreditOutput @resolver(class: "Acme\\StoreCredit\\Model\\Resolver\\ApplyStoreCreditV2")
+```
+
+```graphql
+# app/code/Acme/StoreCreditCustomization/etc/schema.graphqls (unchanged)
+type Mutation {
+    applyStoreCredit(input: ApplyStoreCreditInput!): StoreCreditOutput @resolver(class: "Acme\\StoreCreditCustomization\\Model\\Resolver\\ApplyStoreCredit")
+}
+```
+
+Review both resolver classes and the field's arguments, return type/nullability, cache, directives and callers.
+
+## WARN - GraphQL Mutation target changed
+
+A Magento `Mutation` field has changed while a third-party `schema.graphqls` file defines the same field.
+
+Example:
+```
++-------+---------------------------------+-------------------------------------------------------------+-------------------------------------------------------------------------------------------------+
+| Level | Type                            | File                                                        | To Check                                                                                        |
++-------+---------------------------------+-------------------------------------------------------------+-------------------------------------------------------------------------------------------------+
+| WARN  | GraphQL Mutation target changed | vendor/magento/module-customer-graph-ql/etc/schema.graphqls | app/code/Vendor/CustomerTokenCustomization/etc/schema.graphqls (Mutation generateCustomerToken) |
++-------+---------------------------------+-------------------------------------------------------------+-------------------------------------------------------------------------------------------------+
+```
+
+Your project has `app/code/Vendor/CustomerTokenCustomization/etc/schema.graphqls`, which customises `Mutation generateCustomerToken`:
+
+```diff
+--- vendor_orig/magento/module-customer-graph-ql/etc/schema.graphqls
++++ vendor/magento/module-customer-graph-ql/etc/schema.graphqls
+-    generateCustomerToken(email: String!, password: String!): CustomerToken @resolver(class: "\\Magento\\CustomerGraphQl\\Model\\Resolver\\GenerateCustomerToken")
++    generateCustomerToken(email: String!, password: String!): CustomerToken! @resolver(class: "\\Magento\\CustomerGraphQl\\Model\\Resolver\\GenerateCustomerToken")
+```
+
+```graphql
+# app/code/Vendor/CustomerTokenCustomization/etc/schema.graphqls (unchanged)
+type Mutation {
+    generateCustomerToken(email: String!, password: String!): CustomerToken @resolver(class: "Vendor\\CustomerTokenCustomization\\Model\\Resolver\\GenerateCustomerToken")
+}
+```
+
+During the upgrade `vendor/magento/module-customer-graph-ql/etc/schema.graphqls` changed `Mutation generateCustomerToken`. Review the Magento change alongside the third-party field definition to verify that it is still compatible or necessary. 
 
 ## INFO - Queue consumer added	    
 A queue consumer has been added. 

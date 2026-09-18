@@ -28,6 +28,7 @@ class GraphQLSchema extends AbstractCheck
         }
 
         try {
+            $vendorFile = $this->patchEntry->getPath();
             $originalDefinitions = $this->patchEntry->getGraphQLSchemaDefinitionsFromOriginalFile();
             $newDefinitions = $this->patchEntry->getGraphQLSchemaDefinitionsFromNewFile();
 
@@ -51,6 +52,44 @@ class GraphQLSchema extends AbstractCheck
                 $rootType = str_starts_with($label, 'Query ') ? 'Query' : 'Mutation';
                 $this->infos[$this->getInfoType($rootType, 'added')][$label] = $label;
             }
+
+            $rootFieldDefinitions = $this->m2->getGraphQlRootFieldDefinitions();
+            foreach (Checks::$graphQlTypes as $graphQlType) {
+                if (empty($this->infos[$graphQlType])) {
+                    continue;
+                }
+                foreach ($this->infos[$graphQlType] as $identity) {
+                    $contributingFiles = $rootFieldDefinitions[$identity] ?? [];
+                    $otherFiles = array_values(array_filter($contributingFiles, function ($file) use ($vendorFile) {
+                        return $file !== $vendorFile;
+                    }));
+
+                    if (!str_starts_with($vendorFile, 'vendor/magento/') && !empty($otherFiles)) {
+                        foreach ($otherFiles as $otherFile) {
+                            $this->warnings[$graphQlType][] = "$otherFile ($identity)";
+                        }
+                        unset($this->infos[$graphQlType][$identity]);
+                        continue;
+                    }
+
+                    if (!str_starts_with($vendorFile, 'vendor/magento/')) {
+                        continue;
+                    }
+                    foreach ($otherFiles as $otherFile) {
+                        if (str_starts_with($otherFile, 'vendor/magento/')) {
+                            continue;
+                        }
+                        $rootType = str_starts_with($identity, 'Query ') ? 'Query' : 'Mutation';
+                        $this->warnings[$this->getTargetWarningType($rootType)][] = "$otherFile ($identity)";
+                    }
+                }
+            }
+            foreach (Checks::$graphQlTypes as $graphQlType) {
+                if (empty($this->infos[$graphQlType])) {
+                    unset($this->infos[$graphQlType]);
+                }
+            }
+            unset($graphQlType, $identity, $contributingFiles, $otherFiles, $otherFile);
         } catch (\Throwable $throwable) {
             throw new \InvalidArgumentException('etc/schema.graphqls not parseable: ' . $throwable->getMessage());
         }
@@ -77,5 +116,16 @@ class GraphQLSchema extends AbstractCheck
         ];
 
         return $types[$rootType][$change];
+    }
+
+    /**
+     * @param string $rootType
+     * @return string
+     */
+    private function getTargetWarningType(string $rootType): string
+    {
+        return $rootType === 'Query'
+            ? Checks::TYPE_GRAPHQL_QUERY_TARGET_CHANGED
+            : Checks::TYPE_GRAPHQL_MUTATION_TARGET_CHANGED;
     }
 }

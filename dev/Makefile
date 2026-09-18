@@ -40,3 +40,17 @@ docker-stop-all-containers:     # Stop all upgrade helper docker containers
 	docker container rm uphelper-elasticsearch || true
 	docker container rm uphelper-elasticsearch8 || true
 	docker volume rm docker_excludedvol || true
+
+docker-suspend-all-containers:  # Suspend all running upgrade helper docker containers
+	@for container in uphelper-m24nodb uphelper-m24nodbnohyva uphelper-m2451nodb uphelper-m24 uphelper-m23 uphelper-mysql57 uphelper-elasticsearch uphelper-elasticsearch8; do \
+		if [ "$$(docker inspect -f '{{.State.Running}}' "$$container" 2>/dev/null)" = "true" ]; then \
+			docker container pause "$$container" || exit 1; \
+		fi; \
+	done
+
+docker-resume-all-containers:   # Resume suspended upgrade helper docker containers
+	@for container in uphelper-m24nodb uphelper-m24nodbnohyva uphelper-m2451nodb uphelper-m24 uphelper-m23 uphelper-mysql57 uphelper-elasticsearch uphelper-elasticsearch8; do \
+		if [ "$$(docker inspect -f '{{.State.Paused}}' "$$container" 2>/dev/null)" = "true" ]; then \
+			docker container unpause "$$container" || exit 1; \
+		fi; \
+	done

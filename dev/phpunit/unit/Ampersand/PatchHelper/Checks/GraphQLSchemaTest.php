@@ -11,11 +11,18 @@ class GraphQLSchemaTest extends \PHPUnit\Framework\TestCase
     /** @var Magento2Instance|\PHPUnit\Framework\MockObject\MockObject */
     private $m2;
 
+    /** @var array<string, array<int, string>> */
+    private $rootFieldDefinitions = [];
+
     protected function setUp(): void
     {
         $this->m2 = $this->getMockBuilder(Magento2Instance::class)
             ->disableOriginalConstructor()
             ->getMock();
+        $this->m2->method('getGraphQlRootFieldDefinitions')
+            ->willReturnCallback(function () {
+                return $this->rootFieldDefinitions;
+            });
     }
 
     public function testQueriesAndMutationsAreAddedRemovedAndChanged()
@@ -121,6 +128,94 @@ class GraphQLSchemaTest extends \PHPUnit\Framework\TestCase
         );
     }
 
+    public function testThirdPartyQueryAddedRootFieldIsPromotedToWarning()
+    {
+        $this->assertThirdPartyRootFieldIsPromoted('Query added', 'GraphQL Query added');
+    }
+
+    public function testThirdPartyQueryChangedRootFieldIsPromotedToWarning()
+    {
+        $this->assertThirdPartyRootFieldIsPromoted('Query changed', 'GraphQL Query changed');
+    }
+
+    public function testThirdPartyQueryRemovedRootFieldIsPromotedToWarning()
+    {
+        $this->assertThirdPartyRootFieldIsPromoted('Query removed', 'GraphQL Query removed', true);
+    }
+
+    public function testThirdPartyMutationAddedRootFieldIsPromotedToWarning()
+    {
+        $this->assertThirdPartyRootFieldIsPromoted('Mutation addedMutation', 'GraphQL Mutation added');
+    }
+
+    public function testThirdPartyMutationChangedRootFieldIsPromotedToWarning()
+    {
+        $this->assertThirdPartyRootFieldIsPromoted('Mutation changedMutation', 'GraphQL Mutation changed');
+    }
+
+    public function testThirdPartyMutationRemovedRootFieldIsPromotedToWarning()
+    {
+        $this->assertThirdPartyRootFieldIsPromoted('Mutation removedMutation', 'GraphQL Mutation removed', true);
+    }
+
+    public function testMagentoQueryAddedRootFieldGetsTargetWarning()
+    {
+        $this->assertMagentoRootFieldGetsTargetWarning('Query added', 'GraphQL Query added');
+    }
+
+    public function testMagentoQueryChangedRootFieldGetsTargetWarning()
+    {
+        $this->assertMagentoRootFieldGetsTargetWarning('Query changed', 'GraphQL Query changed');
+    }
+
+    public function testMagentoQueryRemovedRootFieldGetsTargetWarning()
+    {
+        $this->assertMagentoRootFieldGetsTargetWarning('Query removed', 'GraphQL Query removed', true);
+    }
+
+    public function testMagentoMutationAddedRootFieldGetsTargetWarning()
+    {
+        $this->assertMagentoRootFieldGetsTargetWarning('Mutation addedMutation', 'GraphQL Mutation added');
+    }
+
+    public function testMagentoMutationChangedRootFieldGetsTargetWarning()
+    {
+        $this->assertMagentoRootFieldGetsTargetWarning('Mutation changedMutation', 'GraphQL Mutation changed');
+    }
+
+    public function testMagentoMutationRemovedRootFieldGetsTargetWarning()
+    {
+        $this->assertMagentoRootFieldGetsTargetWarning('Mutation removedMutation', 'GraphQL Mutation removed', true);
+    }
+
+    public function testMagentoOnlyAndDistinctRootFieldsRemainInfo()
+    {
+        $this->rootFieldDefinitions = [
+            'Query changed' => [
+                'vendor/magento/module-other/etc/schema.graphqls',
+                'vendor/magento/module-sample/etc/schema.graphqls'
+            ],
+            'Mutation changedMutation' => [
+                'vendor/magento/module-other/etc/schema.graphqls',
+                'vendor/magento/module-sample/etc/schema.graphqls'
+            ],
+            'Query different' => ['app/code/Vendor/Module/etc/schema.graphqls'],
+            'Mutation differentMutation' => ['app/code/Vendor/Module/etc/schema.graphqls']
+        ];
+
+        [$warnings, $infos] = $this->runCheck(
+            'vendor/magento/module-sample/etc/schema.graphqls',
+            'vendor_orig/magento/module-sample/etc/schema.graphqls'
+        );
+
+        $this->assertSame([], $warnings);
+        $this->assertSame('Query changed', $infos['GraphQL Query changed']['Query changed']);
+        $this->assertSame(
+            'Mutation changedMutation',
+            $infos['GraphQL Mutation changed']['Mutation changedMutation']
+        );
+    }
+
     public function testMalformedSchemaHasContextualError()
     {
         $entry = new Entry(
@@ -168,5 +263,47 @@ class GraphQLSchemaTest extends \PHPUnit\Framework\TestCase
         $this->assertSame([], $ignored);
 
         return $infos;
+    }
+
+    /**
+     * @return array{array<string, array<int, string>>, array<string, array<string, string>>}
+     */
+    private function runCheck(string $newFile, string $originalFile): array
+    {
+        $entry = new Entry($this->testResourcesDir, $newFile, $originalFile);
+        $warnings = $infos = $ignored = [];
+        $check = new GraphQLSchema($this->m2, $entry, '', $warnings, $infos, $ignored);
+
+        $check->check();
+        $this->assertSame([], $ignored);
+
+        return [$warnings, $infos];
+    }
+
+    private function assertThirdPartyRootFieldIsPromoted(string $identity, string $type, bool $removed = false): void
+    {
+        $source = 'app/code/Vendor/Module/etc/schema.graphqls';
+        $contributor = 'vendor/example/module-contributor/etc/schema.graphqls';
+        $this->rootFieldDefinitions = [$identity => $removed ? [$contributor] : [$source, $contributor]];
+
+        [$warnings, $infos] = $this->runCheck($source, 'vendor_orig/' . $source);
+
+        $this->assertSame([$type => ["$contributor ($identity)"]], $warnings);
+        $this->assertArrayNotHasKey($identity, $infos[$type] ?? []);
+    }
+
+    private function assertMagentoRootFieldGetsTargetWarning(string $identity, string $type, bool $removed = false): void
+    {
+        $source = 'vendor/magento/module-sample/etc/schema.graphqls';
+        $contributor = 'app/code/Vendor/Module/etc/schema.graphqls';
+        $this->rootFieldDefinitions = [$identity => $removed ? [$contributor] : [$contributor, $source]];
+
+        [$warnings, $infos] = $this->runCheck($source, 'vendor_orig/magento/module-sample/etc/schema.graphqls');
+
+        $targetType = str_starts_with($identity, 'Query ')
+            ? 'GraphQL Query target changed'
+            : 'GraphQL Mutation target changed';
+        $this->assertSame([$targetType => ["$contributor ($identity)"]], $warnings);
+        $this->assertSame($identity, $infos[$type][$identity]);
     }
 }

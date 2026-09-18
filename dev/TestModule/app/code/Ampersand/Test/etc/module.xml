@@ -6,6 +6,8 @@
             <module name="Ampersand_TestVendor"/>
             <module name="Magento_AdvancedPricing"/>
             <module name="Magento_Store"/>
+            <module name="Magento_StoreGraphQl"/>
+            <module name="Magento_CustomerGraphQl"/>
             <module name="Magento_Theme"/>
         </sequence>
     </module>

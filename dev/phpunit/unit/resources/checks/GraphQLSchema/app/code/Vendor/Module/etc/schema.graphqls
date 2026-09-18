@@ -1,0 +1,15 @@
+type Query {
+    unchanged: String @doc(description: "After") @resolver(class: "Example\\Resolver")
+    changed(input: Input! = {a: 1, b: 2}): String! @resolver(class: "Example\\NewResolver")
+    added: String
+    extended: [String!]!
+}
+
+type Mutation {
+    changedMutation: String! @deprecated(reason: "Use another mutation")
+    addedMutation: String
+}
+
+type SupportingType {
+    supporting: String!
+}

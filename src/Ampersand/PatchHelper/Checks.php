@@ -25,6 +25,8 @@ class Checks
     public const TYPE_GRAPHQL_MUTATION_ADDED = 'GraphQL Mutation added';
     public const TYPE_GRAPHQL_MUTATION_REMOVED = 'GraphQL Mutation removed';
     public const TYPE_GRAPHQL_MUTATION_CHANGED = 'GraphQL Mutation changed';
+    public const TYPE_GRAPHQL_QUERY_TARGET_CHANGED = 'GraphQL Query target changed';
+    public const TYPE_GRAPHQL_MUTATION_TARGET_CHANGED = 'GraphQL Mutation target changed';
     public const TYPE_PREFERENCE_REMOVED = 'Preference Removed';
     public const TYPE_PREFERENCE = 'Preference';
     public const TYPE_METHOD_PLUGIN = 'Plugin';
@@ -55,6 +57,18 @@ class Checks
         self::TYPE_WEBAPI_REST_ADDED,
         self::TYPE_WEBAPI_REST_CHANGED,
         self::TYPE_WEBAPI_REST_REMOVED
+    ];
+
+    /**
+     * @var string[]
+     */
+    public static $graphQlTypes = [
+        self::TYPE_GRAPHQL_QUERY_ADDED,
+        self::TYPE_GRAPHQL_QUERY_CHANGED,
+        self::TYPE_GRAPHQL_QUERY_REMOVED,
+        self::TYPE_GRAPHQL_MUTATION_ADDED,
+        self::TYPE_GRAPHQL_MUTATION_CHANGED,
+        self::TYPE_GRAPHQL_MUTATION_REMOVED
     ];
 
     /**

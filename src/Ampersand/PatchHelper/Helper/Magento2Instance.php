@@ -2,6 +2,7 @@
 
 namespace Ampersand\PatchHelper\Helper;
 
+use Ampersand\PatchHelper\Patchfile\Entry\GraphQLSchemaDefinitions;
 use Ampersand\PatchHelper\Patchfile\Entry\WebApiRestDefinitions;
 use Ampersand\PatchHelper\Patchfile\Sanitiser;
 use Magento\Framework\App\Area;
@@ -53,6 +54,9 @@ class Magento2Instance
     /** @var  string[] */
     private $listOfHtmlFiles = [];
 
+    /** @var string[] */
+    private $listOfGraphQlSchemaFiles = [];
+
     /** @var array<string, array<int, string>>  */
     private $dbSchemaThirdPartyAlteration = [];
 
@@ -61,6 +65,9 @@ class Magento2Instance
 
     /** @var array<string, array<int, string>> */
     private $webApiRestRouteDefinitions = [];
+
+    /** @var array<string, array<int, string>> */
+    private $graphQlRootFieldDefinitions = [];
 
     /** @var  array<string, array<string, mixed>> */
     private $areaConfig = [];
@@ -122,6 +129,7 @@ class Magento2Instance
         $dirList = $objectManager->get(DirectoryList::class);
         $this->listXmlFiles([$dirList->getPath('app'), $dirList->getRoot() . '/vendor']);
         $this->listHtmlFiles([$dirList->getPath('app'), $dirList->getRoot() . '/vendor']);
+        $this->listGraphQlSchemaFiles([$dirList->getPath('app'), $dirList->getRoot() . '/vendor']);
         try {
             $this->prepareDbSchemaXmlData();
         } catch (\Throwable $throwable) {
@@ -129,6 +137,11 @@ class Magento2Instance
         }
         try {
             $this->prepareWebApiRestXmlData();
+        } catch (\Throwable $throwable) {
+            $this->bootErrors[] = $throwable;
+        }
+        try {
+            $this->prepareGraphQlSchemaData();
         } catch (\Throwable $throwable) {
             $this->bootErrors[] = $throwable;
         }
@@ -494,6 +507,14 @@ class Magento2Instance
     }
 
     /**
+     * @return array<string, array<int, string>>
+     */
+    public function getGraphQlRootFieldDefinitions()
+    {
+        return $this->graphQlRootFieldDefinitions;
+    }
+
+    /**
      * Prepare a map of REST route identities to every webapi.xml that contributes to them.
      *
      * @return void
@@ -531,6 +552,31 @@ class Magento2Instance
     }
 
     /**
+     * Prepare a map of GraphQL root-field identities to every schema.graphqls that contributes to them.
+     *
+     * @return void
+     */
+    private function prepareGraphQlSchemaData()
+    {
+        $rootDir = $this->objectManager->get(DirectoryList::class)->getRoot();
+        $graphQlDefinitions = new GraphQLSchemaDefinitions('');
+        foreach ($this->listOfGraphQlSchemaFiles as $schemaFile) {
+            $relativeFile = sanitize_filepath($rootDir, $schemaFile);
+            foreach ($graphQlDefinitions->getDefinitionsFromFilepath($schemaFile) as $identity => $definition) {
+                $this->graphQlRootFieldDefinitions[$identity][] = $relativeFile;
+            }
+        }
+        unset($graphQlDefinitions, $schemaFile, $relativeFile, $identity, $definition);
+
+        ksort($this->graphQlRootFieldDefinitions);
+        foreach ($this->graphQlRootFieldDefinitions as &$files) {
+            $files = array_values(array_unique($files));
+            sort($files);
+        }
+        unset($files);
+    }
+
+    /**
      * Loads list of all html files into memory to prevent repeat scans of the file system
      *
      * @param string[] $directories
@@ -549,6 +595,29 @@ class Magento2Instance
         }
 
         sort($this->listOfHtmlFiles);
+    }
+
+    /**
+     * Loads list of all GraphQL schema files into memory to prevent repeat scans of the file system.
+     *
+     * @param string[] $directories
+     * @return void
+     */
+    private function listGraphQlSchemaFiles(array $directories)
+    {
+        foreach ($directories as $dir) {
+            $graphQlSchemaFiles = shell_exec("find {$dir} -name \"schema.graphqls\"");
+            if (!is_string($graphQlSchemaFiles)) {
+                continue;
+            }
+
+            $files = array_filter(explode(PHP_EOL, $graphQlSchemaFiles), function ($file) {
+                return !str_contains($file, '/tests/') && !str_contains($file, '/dev/tools/');
+            });
+            $this->listOfGraphQlSchemaFiles = array_merge($this->listOfGraphQlSchemaFiles, $files);
+        }
+
+        sort($this->listOfGraphQlSchemaFiles);
     }
 
     /**

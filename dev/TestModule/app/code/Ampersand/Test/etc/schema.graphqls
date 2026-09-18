@@ -1,0 +1,13 @@
+type Query {
+    upgradeHelperAddedQuery: String
+    upgradeHelperRemovedQuery: String
+    upgradeHelperChangedQuery: String
+    storeConfig: StoreConfig
+}
+
+type Mutation {
+    upgradeHelperAddedMutation: String
+    upgradeHelperRemovedMutation: String
+    upgradeHelperChangedMutation: String
+    generateCustomerToken(email: String!, password: String!): CustomerToken
+}

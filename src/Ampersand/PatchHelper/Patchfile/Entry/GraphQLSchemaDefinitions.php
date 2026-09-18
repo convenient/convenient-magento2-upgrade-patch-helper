@@ -26,6 +26,17 @@ class GraphQLSchemaDefinitions
         }
 
         $filepath = realpath($this->directory . DIRECTORY_SEPARATOR . $file);
+        return $this->getDefinitionsFromFilepath($filepath ?: '');
+    }
+
+    /**
+     * @return array<string, array{label: string, value: string}>
+     */
+    public function getDefinitionsFromFilepath(string $filepath)
+    {
+        if (pathinfo($filepath, PATHINFO_BASENAME) !== 'schema.graphqls') {
+            return [];
+        }
         if (!is_file($filepath)) {
             return [];
         }
@@ -41,7 +52,7 @@ class GraphQLSchemaDefinitions
             $document = Parser::parse($this->addPlaceholdersToEmptyTypes($schema));
         } catch (\Throwable $throwable) {
             throw new \RuntimeException(
-                sprintf('Unable to parse %s: %s', $file, $throwable->getMessage())
+                sprintf('Unable to parse %s: %s', $filepath, $throwable->getMessage())
             );
         }
 

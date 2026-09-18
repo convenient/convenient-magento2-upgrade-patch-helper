@@ -1,0 +1,14 @@
+type Query {
+    unchanged: String @resolver(class: "Example\\Resolver") @doc(description: "Before")
+    changed(input: Input = {b: 2, a: 1}): String @resolver(class: "Example\\OldResolver")
+    removed: String
+}
+
+type Mutation {
+    changedMutation: String
+    removedMutation: String
+}
+
+type SupportingType {
+    supporting: String
+}
