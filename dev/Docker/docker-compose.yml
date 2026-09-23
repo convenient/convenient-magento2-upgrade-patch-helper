@@ -9,24 +9,16 @@ services:
     image: docker.elastic.co/elasticsearch/elasticsearch:7.8.1
     environment:
       - discovery.type=single-node
-    ports:
-      - "9200:9200"
-      - "9300:9300"
   elasticsearch8:
     container_name: uphelper-elasticsearch8
     image: docker.elastic.co/elasticsearch/elasticsearch:8.18.0
     environment:
       - discovery.type=single-node
       - xpack.security.enabled=false
-    ports:
-      - "9200:9200"
-      - "9300:9300"
   mysql57:
     container_name: uphelper-mysql57
     image: mysql:5.7.38-debian
     platform: linux/amd64
-    ports:
-      - "9999:3306"
     environment:
       - MYSQL_ALLOW_EMPTY_PASSWORD=1
   m2451nodb:

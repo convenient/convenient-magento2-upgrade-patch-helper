@@ -13,9 +13,9 @@ Trace the existing check, parser, validator dispatch, unit fixtures and report o
 
 ## Ground in Magento source
 
-Before semantic implementation, inspect the relevant code under `dev/vanilla/vendor/magento/`, the local Magento 2.4.8 reference. For XML, read the schema and reader/converter; otherwise inspect the responsible core class or service. Establish valid inputs, effective identity, meaningful values and normalisation, and compare those with the check. Its existing code and tests are not proof of Magento's behaviour.
+Before semantic implementation, read [dev/MAGENTO_REFERENCE.md](../../../dev/MAGENTO_REFERENCE.md), then inspect the relevant code under `dev/vanilla/vendor/magento/`, the local Magento 2.4.8 reference. For XML, read the schema and reader/converter; otherwise inspect the responsible core class or service. Establish valid inputs, effective identity, meaningful values and normalisation, and compare those with the check. Its existing code and tests are not proof of Magento's behaviour.
 
-Distinguish declaration identity, effective configuration and report labels according to the intended reporting contract. Follow [Magento reference source](../../../AGENTS.md#magento-reference-source) for missing-reference and supported-version handling. Purely mechanical refactors do not need fresh semantic investigation.
+Distinguish declaration identity, effective configuration and report labels according to the intended reporting contract. Follow [Magento source investigation](../../../dev/MAGENTO_REFERENCE.md#source-investigation) for missing-reference and supported-version handling. Purely mechanical refactors do not need fresh semantic investigation.
 
 ## Correct and cover
 
@@ -25,12 +25,12 @@ Add focused, DAMP unit coverage for distinct regressions and safety branches. Ad
 
 Isolate optional-package absence tests from mocks that define the supposedly missing classes. Use a separate process without preserved global state where necessary, and assert that the class is absent before exercising the check.
 
-Follow [Local development and tests](../../../AGENTS.md#local-development-and-tests) for safe fixture sync and complete `.actual` output. Establish why changed rows and counts are legitimate before accepting golden updates. Update user documentation only when report interpretation changes, using the concise style in [Check implementation and documentation](../../../AGENTS.md#check-implementation-and-documentation).
+Before changing or operating functional fixtures, read [Development workflow](../../../dev/README.md) for safe fixture sync and complete `.actual` output. Establish why changed rows and counts are legitimate before accepting golden updates. Update user documentation only when report interpretation changes, using the concise style in [Check implementation and documentation](../../../AGENTS.md#check-implementation-and-documentation).
 
 Treat existing report rows as regression coverage. Investigate disappearing warnings; do not remove expectations merely because new fixtures or dependencies make them disappear. Correct unintended fixture or analyser regressions before updating goldens.
 
 ## Validate and hand off
 
-Run the focused test, full unit, static and PHPStan checks unless the user restricts validation; refresh Composer's classmap when adding classes. Run relevant existing functional suites only within the authorised scope, using [Task authorisation and execution permissions](../../../AGENTS.md#task-authorisation-and-execution-permissions). For Codex-specific saved approvals, use [dev/CODEX.md](../../../dev/CODEX.md).
+Run the focused test, full unit, static and PHPStan checks unless the user restricts validation; refresh Composer's classmap when adding classes. Run relevant existing functional suites only within the authorised scope, using [Task authorisation and execution permissions](../../../AGENTS.md#task-authorisation-and-execution-permissions). Before relying on or managing Codex-specific saved approvals, read [dev/CODEX.md](../../../dev/CODEX.md).
 
 Report the correction, Magento source evidence, legitimate report differences, passed checks and validation gaps. Do not weaken approval boundaries to finish validation.

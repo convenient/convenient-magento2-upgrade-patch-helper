@@ -198,21 +198,24 @@ fi
 if [ "$NODB" == "0" ]; then
 
   echo "Creating database testmagento$ID"
-  mysql -uroot -h$HOSTNAME --port=9999 -e "drop database if exists testmagento$ID;" -vvv
-  mysql -uroot -h$HOSTNAME --port=9999 -e "create database testmagento$ID;" -vvv
+  mysql -uroot -hmysql57 --port=3306 -e "drop database if exists testmagento$ID;" -vvv
+  mysql -uroot -hmysql57 --port=3306 -e "create database testmagento$ID;" -vvv
 
   SEARCH_ENGINE_VERSION="elasticsearch7"
+  SEARCH_ENGINE_HOST="elasticsearch"
   if [[ "$MAGE_TO" == 2.4.8* ]]; then
     SEARCH_ENGINE_VERSION="elasticsearch8"
+    SEARCH_ENGINE_HOST="elasticsearch8"
   fi
   if [[ "$MAGE_TO" == 2.4.9* ]]; then
     SEARCH_ENGINE_VERSION="elasticsearch8"
+    SEARCH_ENGINE_HOST="elasticsearch8"
   fi
 
   ES_INSTALL_PARAM=''
   if [[ ! "$MAGE_TO" == 2.3* ]]; then
-    if curl http://$HOSTNAME:9200; then
-      ES_INSTALL_PARAM=" --search-engine=$SEARCH_ENGINE_VERSION --elasticsearch-host=$HOSTNAME "
+    if curl "http://$SEARCH_ENGINE_HOST:9200"; then
+      ES_INSTALL_PARAM=" --search-engine=$SEARCH_ENGINE_VERSION --elasticsearch-host=$SEARCH_ENGINE_HOST "
     fi
   fi
 
@@ -222,7 +225,7 @@ if [ "$NODB" == "0" ]; then
   php -d memory_limit=1024M bin/magento setup:install \
       --admin-firstname=ampersand --admin-lastname=developer --admin-email=example@example.com \
       --admin-user=admin --admin-password=somepass123 \
-      --db-name=testmagento$ID --db-user=root --db-host=$HOSTNAME:9999 $ES_INSTALL_PARAM \
+      --db-name=testmagento$ID --db-user=root --db-host=mysql57:3306 $ES_INSTALL_PARAM \
       --backend-frontname=admin \
       --base-url=https://magento-$ID-develop.localhost/ \
       --language=en_GB --currency=GBP --timezone=Europe/London \
@@ -237,8 +240,8 @@ if [ "$NODB" == "0" ]; then
 
   if [[ "${WITH_HYVA:-1}" == "1" ]]; then
     # Hyva fallback theme configuration
-    mysql -uroot -h$HOSTNAME --port=9999 "testmagento$ID" -e "insert into core_config_data(path, value) values ('hyva_theme_fallback/general/enable', '1');";
-    mysql -uroot -h$HOSTNAME --port=9999 "testmagento$ID" -e "insert into core_config_data(path, value) values ('hyva_theme_fallback/general/theme_full_path', 'frontend/HyvaFallback/theme');";
+    mysql -uroot -hmysql57 --port=3306 "testmagento$ID" -e "insert into core_config_data(path, value) values ('hyva_theme_fallback/general/enable', '1');";
+    mysql -uroot -hmysql57 --port=3306 "testmagento$ID" -e "insert into core_config_data(path, value) values ('hyva_theme_fallback/general/theme_full_path', 'frontend/HyvaFallback/theme');";
   fi
 
   php bin/magento cache:flush

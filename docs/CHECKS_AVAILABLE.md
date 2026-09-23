@@ -132,7 +132,7 @@ Example:
 You have a plugin `Ampersand\Test\Plugin\AdobeImsUserProfile::afterGetUpdatedAt` and the core `Magento\AdobeIms\Model\UserProfile::getUpdatedAt` function has been added, so the plugin becomes active.
 
 ## WARN - Plugin Disabled
-A plugin exists on function which was added to the codebase as part of this upgrade. You have new plugin logic firing where previously you did not.
+A plugin targets a function which was removed from the codebase as part of this upgrade. The plugin no longer fires.
 
 Example:
 
