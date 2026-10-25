@@ -1,0 +1,35 @@
+{
+  "category_intro": {
+    "label": "Custom category introduction",
+    "content": {
+      "includes": "Hyva_TestCms::etc/hyva_cms/content-fields.json",
+      "cta_label": {
+        "type": "text",
+        "label": "Custom call to action label"
+      }
+    }
+  },
+  "product_summary": {
+    "label": "Custom product summary",
+    "content": {
+      "includes": "Hyva_TestCms::etc/hyva_cms/content-fields.json",
+      "subtitle": {
+        "type": "text",
+        "label": "Custom subtitle"
+      }
+    }
+  },
+  "article_teaser": {
+    "label": "Custom article teaser"
+  },
+  "article_content": {
+    "label": "Article content",
+    "content": {
+      "includes": "Hyva_TestCms::etc/hyva_cms/content-fields.json",
+      "body": {
+        "type": "textarea",
+        "label": "Custom body copy"
+      }
+    }
+  }
+}

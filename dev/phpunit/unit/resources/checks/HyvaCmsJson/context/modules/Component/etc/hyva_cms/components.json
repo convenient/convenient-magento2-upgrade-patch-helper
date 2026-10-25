@@ -1,0 +1,7 @@
+{
+  "context_card": {
+    "content": {
+      "includes": "Example_Fragment::etc/hyva_cms/fields.json"
+    }
+  }
+}

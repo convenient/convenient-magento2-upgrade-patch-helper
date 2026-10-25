@@ -24,6 +24,12 @@
 - [WARN - GraphQL Mutation removed](#warn---graphql-mutation-removed)
 - [WARN - GraphQL Mutation changed](#warn---graphql-mutation-changed)
 - [WARN - GraphQL Mutation target changed](#warn---graphql-mutation-target-changed)
+- [WARN - Hyva CMS added](#warn---hyva-cms-added)
+- [WARN - Hyva CMS removed](#warn---hyva-cms-removed)
+- [WARN - Hyva CMS changed](#warn---hyva-cms-changed)
+- [WARN - Hyva CMS Include added](#warn---hyva-cms-include-added)
+- [WARN - Hyva CMS Include removed](#warn---hyva-cms-include-removed)
+- [WARN - Hyva CMS Include changed](#warn---hyva-cms-include-changed)
 - [INFO - Queue consumer added](#info---queue-consumer-added)
 - [INFO - Queue consumer removed](#info---queue-consumer-removed)
 - [INFO - Queue consumer changed](#info---queue-consumer-changed)
@@ -1059,3 +1065,215 @@ Example:
 ```
 
 Often no action is needed. A setup script `Ampersand\TestVendor\Setup\InstallSchema` has been added/changed. You may want to have a look at the code to see what it is doing.
+
+## WARN - Hyva CMS added
+
+A vendor `components.json` component has been added.
+
+This is a `WARN` because another module declares the same component name. Hyvä CMS replaces the earlier top-level component declaration with the later declaration, so the external declaration may need to incorporate the new vendor component configuration.
+
+Example:
+
+```
++-------+----------------+------------------------------------------------------------------------------------------+-----------------------------------------------------------------------+
+| Level | Type           | File                                                                                     | To Check                                                              |
++-------+----------------+------------------------------------------------------------------------------------------+-----------------------------------------------------------------------+
+| WARN  | Hyva CMS added | vendor/hyva-themes/upgrade-patch-helper-test-cms/src/module/etc/hyva_cms/components.json | app/code/Ampersand/Test/etc/hyva_cms/components.json (category_intro) |
++-------+----------------+------------------------------------------------------------------------------------------+-----------------------------------------------------------------------+
+```
+
+For example, this component was added in the upgraded vendor declaration:
+
+```diff
+--- vendor_orig/hyva-themes/upgrade-patch-helper-test-cms/src/module/etc/hyva_cms/components.json
++++ vendor/hyva-themes/upgrade-patch-helper-test-cms/src/module/etc/hyva_cms/components.json
+@@ -1,2 +1,7 @@
+ {
++  "category_intro": {
++    "label": "Category introduction"
++  }
+ }
+```
+
+The unchanged external declaration is `app/code/Ampersand/Test/etc/hyva_cms/components.json`:
+
+```json
+{"category_intro": {"label": "Custom category introduction"}}
+```
+
+Review the external component declaration and decide whether it should incorporate the new vendor configuration.
+
+## WARN - Hyva CMS removed
+
+A vendor `components.json` component has been removed.
+
+This is a `WARN` because another module still declares the same component name. Review whether that declaration should now replace the removed vendor component or should itself be removed.
+
+Example:
+
+```
++-------+------------------+------------------------------------------------------------------------------------------+-----------------------------------------------------------------------+
+| Level | Type             | File                                                                                     | To Check                                                              |
++-------+------------------+------------------------------------------------------------------------------------------+-----------------------------------------------------------------------+
+| WARN  | Hyva CMS removed | vendor/hyva-themes/upgrade-patch-helper-test-cms/src/module/etc/hyva_cms/components.json | app/code/Ampersand/Test/etc/hyva_cms/components.json (article_teaser) |
++-------+------------------+------------------------------------------------------------------------------------------+-----------------------------------------------------------------------+
+```
+
+For example, this vendor component was removed:
+
+```diff
+--- vendor_orig/hyva-themes/upgrade-patch-helper-test-cms/src/module/etc/hyva_cms/components.json
++++ vendor/hyva-themes/upgrade-patch-helper-test-cms/src/module/etc/hyva_cms/components.json
+@@ -1,5 +1 @@
+ {
+-  "article_teaser": {
+-    "label": "Article teaser"
+-  }
+ }
+```
+
+The unchanged external declaration is `app/code/Ampersand/Test/etc/hyva_cms/components.json`:
+
+```json
+{"article_teaser": {"label": "Custom article teaser"}}
+```
+
+## WARN - Hyva CMS changed
+
+A vendor `components.json` component has been changed.
+
+This is a `WARN` because another module declares the same component name. Hyvä CMS replaces top-level component declarations, so review the external declaration against the changed vendor declaration.
+
+Example:
+
+```
++-------+------------------+------------------------------------------------------------------------------------------+------------------------------------------------------------------------+
+| Level | Type             | File                                                                                     | To Check                                                               |
++-------+------------------+------------------------------------------------------------------------------------------+------------------------------------------------------------------------+
+| WARN  | Hyva CMS changed | vendor/hyva-themes/upgrade-patch-helper-test-cms/src/module/etc/hyva_cms/components.json | app/code/Ampersand/Test/etc/hyva_cms/components.json (product_summary) |
++-------+------------------+------------------------------------------------------------------------------------------+------------------------------------------------------------------------+
+```
+
+For example, the vendor component changed its field definition:
+
+```diff
+--- vendor_orig/hyva-themes/upgrade-patch-helper-test-cms/src/module/etc/hyva_cms/components.json
++++ vendor/hyva-themes/upgrade-patch-helper-test-cms/src/module/etc/hyva_cms/components.json
+@@ -1,3 +1,3 @@
+ {
+-  "product_summary": {"content": {"layout": "compact"}}
++  "product_summary": {"content": {"layout": "expanded"}}
+ }
+```
+
+The unchanged external declaration is `app/code/Ampersand/Test/etc/hyva_cms/components.json`:
+
+```json
+{"product_summary": {"label": "Custom product summary"}}
+```
+
+## WARN - Hyva CMS Include added
+
+A field has been added to a vendor JSON include fragment.
+
+This is a `WARN` because an external component directly masks the field, a later external include masks it, or the newly inherited field duplicates a field in another section.
+
+Example:
+
+```
++-------+------------------------+----------------------------------------------------------------------------------------------+-----------------------------------------------------------------------+
+| Level | Type                   | File                                                                                         | To Check                                                              |
++-------+------------------------+----------------------------------------------------------------------------------------------+-----------------------------------------------------------------------+
+| WARN  | Hyva CMS Include added | vendor/hyva-themes/upgrade-patch-helper-test-cms/src/module/etc/hyva_cms/content-fields.json | app/code/Ampersand/Test/etc/hyva_cms/components.json (category_intro) |
++-------+------------------------+----------------------------------------------------------------------------------------------+-----------------------------------------------------------------------+
+```
+
+For example, the included vendor fragment adds `cta_label`:
+
+```diff
+--- vendor_orig/hyva-themes/upgrade-patch-helper-test-cms/src/module/etc/hyva_cms/content-fields.json
++++ vendor/hyva-themes/upgrade-patch-helper-test-cms/src/module/etc/hyva_cms/content-fields.json
+@@ -1,2 +1,3 @@
+ {
++  "cta_label": {"type": "text", "label": "Call to action label"}
+ }
+```
+
+The unchanged external component directly defines the same field:
+
+```json
+{"category_intro": {"content": {"includes": "Hyva_TestCms::etc/hyva_cms/content-fields.json", "cta_label": {"type": "text", "label": "Custom call to action label"}}}}
+```
+
+Review the component declaration and its includes.
+
+## WARN - Hyva CMS Include removed
+
+A field or an entire include fragment has been removed from a vendor `etc/hyva_cms` JSON file.
+
+This is a `WARN` because an external component preserves the removed field, or still references the removed fragment.
+
+Example:
+
+```
++-------+--------------------------+----------------------------------------------------------------------------------------------+------------------------------------------------------------------------+
+| Level | Type                     | File                                                                                         | To Check                                                               |
++-------+--------------------------+----------------------------------------------------------------------------------------------+------------------------------------------------------------------------+
+| WARN  | Hyva CMS Include removed | vendor/hyva-themes/upgrade-patch-helper-test-cms/src/module/etc/hyva_cms/content-fields.json | app/code/Ampersand/Test/etc/hyva_cms/components.json (product_summary) |
++-------+--------------------------+----------------------------------------------------------------------------------------------+------------------------------------------------------------------------+
+```
+
+For example, `subtitle` was removed from the included vendor fragment:
+
+```diff
+--- vendor_orig/hyva-themes/upgrade-patch-helper-test-cms/src/module/etc/hyva_cms/content-fields.json
++++ vendor/hyva-themes/upgrade-patch-helper-test-cms/src/module/etc/hyva_cms/content-fields.json
+@@ -1,3 +1 @@
+ {
+-  "subtitle": {"type": "text", "label": "Subtitle"}
+ }
+```
+
+The unchanged external component still defines that field:
+
+```json
+{"product_summary": {"content": {"includes": "Hyva_TestCms::etc/hyva_cms/content-fields.json", "subtitle": {"type": "text", "label": "Custom subtitle"}}}}
+```
+
+Review its direct fields and includes.
+
+## WARN - Hyva CMS Include changed
+
+A field in a vendor JSON include fragment has been changed.
+
+This is a `WARN` because an external component directly masks the field or a later external include masks it.
+
+Example:
+
+```
++-------+--------------------------+----------------------------------------------------------------------------------------------+------------------------------------------------------------------------+
+| Level | Type                     | File                                                                                         | To Check                                                               |
++-------+--------------------------+----------------------------------------------------------------------------------------------+------------------------------------------------------------------------+
+| WARN  | Hyva CMS Include changed | vendor/hyva-themes/upgrade-patch-helper-test-cms/src/module/etc/hyva_cms/content-fields.json | app/code/Ampersand/Test/etc/hyva_cms/components.json (article_content) |
++-------+--------------------------+----------------------------------------------------------------------------------------------+------------------------------------------------------------------------+
+```
+
+For example, the included `body` field changed its type:
+
+```diff
+--- vendor_orig/hyva-themes/upgrade-patch-helper-test-cms/src/module/etc/hyva_cms/content-fields.json
++++ vendor/hyva-themes/upgrade-patch-helper-test-cms/src/module/etc/hyva_cms/content-fields.json
+@@ -1,3 +1,3 @@
+ {
+-  "body": {"type": "text", "label": "Body copy"}
++  "body": {"type": "textarea", "label": "Body copy"}
+ }
+```
+
+The unchanged external component masks the field:
+
+```json
+{"article_content": {"content": {"includes": "Hyva_TestCms::etc/hyva_cms/content-fields.json", "body": {"type": "textarea", "label": "Custom body copy"}}}}
+```
+
+Review the component declaration to decide whether its override remains intentional.

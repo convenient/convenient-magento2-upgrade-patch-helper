@@ -12,6 +12,8 @@ class MagentoProjectAutoloaderTest extends \PHPUnit\Framework\TestCase
         foreach (array_reverse($this->temporaryDirectories) as $directory) {
             @unlink($directory . '/app/bootstrap.php');
             @rmdir($directory . '/app');
+            @unlink($directory . '/vendor/autoload.php');
+            @rmdir($directory . '/vendor');
             @unlink($directory . '/vendor.patch');
             @rmdir($directory);
         }
@@ -236,6 +238,22 @@ class MagentoProjectAutoloaderTest extends \PHPUnit\Framework\TestCase
         );
     }
 
+    public function testRegisterReturnsWarningWhenVendorAutoloadIsMissing()
+    {
+        $project = $this->createProject(
+            true,
+            "<?php\n\$GLOBALS['magento_project_autoloader_bootstrap_count'] = 1;\n"
+        );
+        unlink($project . '/vendor/autoload.php');
+
+        $this->assertSame(
+            "Early Magento bootstrap skipped: Vendor autoload is missing or unreadable: $project/vendor/autoload.php. "
+                . 'Continuing with normal command handling.',
+            MagentoProjectAutoloader::registerFromCommandArguments(['patch-helper.php', 'analyse', $project])
+        );
+        $this->assertArrayNotHasKey('magento_project_autoloader_bootstrap_count', $GLOBALS);
+    }
+
     public function testRegisterSkipsInformationalRequests()
     {
         $project = $this->createProject(
@@ -280,6 +298,8 @@ class MagentoProjectAutoloaderTest extends \PHPUnit\Framework\TestCase
             file_put_contents($project . '/vendor.patch', 'fixture');
         }
         file_put_contents($project . '/app/bootstrap.php', $bootstrapContents);
+        mkdir($project . '/vendor');
+        file_put_contents($project . '/vendor/autoload.php', '<?php');
 
         return $project;
     }

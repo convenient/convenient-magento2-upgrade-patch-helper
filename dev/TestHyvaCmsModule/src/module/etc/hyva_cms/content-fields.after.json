@@ -1,0 +1,10 @@
+{
+  "body": {
+    "type": "textarea",
+    "label": "Body copy"
+  },
+  "cta_label": {
+    "type": "text",
+    "label": "Call to action label"
+  }
+}

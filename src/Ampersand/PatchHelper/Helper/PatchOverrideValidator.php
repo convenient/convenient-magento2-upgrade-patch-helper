@@ -96,7 +96,13 @@ class PatchOverrideValidator
             Checks::TYPE_GRAPHQL_MUTATION_CHANGED => [],
             Checks::TYPE_GRAPHQL_MUTATION_REMOVED => [],
             Checks::TYPE_METHOD_PLUGIN_DISABLED => [],
-            Checks::TYPE_METHOD_PLUGIN_ENABLED => []
+            Checks::TYPE_METHOD_PLUGIN_ENABLED => [],
+            Checks::TYPE_HYVA_CMS_ADDED => [],
+            Checks::TYPE_HYVA_CMS_REMOVED => [],
+            Checks::TYPE_HYVA_CMS_CHANGED => [],
+            Checks::TYPE_HYVA_CMS_INCLUDE_ADDED => [],
+            Checks::TYPE_HYVA_CMS_INCLUDE_REMOVED => [],
+            Checks::TYPE_HYVA_CMS_INCLUDE_CHANGED => [],
         ];
         $this->ignored = $this->warnings; // Any warning can be ignored
         $this->infos = [
@@ -258,6 +264,22 @@ class PatchOverrideValidator
                 $vendorNamespaces
             ),
             new Checks\ThemeViewXml(
+                $m2,
+                $patchEntry,
+                $this->appCodeFilepath,
+                $this->warnings,
+                $this->infos,
+                $this->ignored
+            ),
+            new Checks\HyvaCmsComponentsJson(
+                $m2,
+                $patchEntry,
+                $this->appCodeFilepath,
+                $this->warnings,
+                $this->infos,
+                $this->ignored
+            ),
+            new Checks\HyvaCmsIncludeJson(
                 $m2,
                 $patchEntry,
                 $this->appCodeFilepath,

@@ -66,6 +66,10 @@ composer2 require ampersand/upgrade-patch-helper-test-module:"*" --no-update
 composer2 require ampersand/upgrade-patch-helper-test-module-to-be-removed:"*" --no-update
 composer2 require amasty/gdpr-cookie:"*" --no-update
 if [[ "${WITH_HYVA:-1}" == "1" ]]; then
+  composer2 config repositories.ampersandtesthyvacms '{"type": "path", "url": "./../../TestHyvaCmsModule/", "options":{"symlink":false}}'
+  composer2 require hyva-themes/upgrade-patch-helper-test-cms:"*" --no-update
+fi
+if [[ "${WITH_HYVA:-1}" == "1" ]]; then
   composer2 config repositories.ampersandtesthyvaextended '{"type": "path", "url": "./../../TestHyvaExtendedTheme/", "options": {"symlink":false}}'
   composer2 config repositories.ampersandtesthyvastub '{"type": "path", "url": "./../../TestHyvaThemeStub/", "options": {"symlink":false}}'
   composer2 config repositories.ampersandtesthyvafallback '{"type": "path", "url": "./../../TestHyvaFallbackTheme/", "options": {"symlink":false}}'
@@ -144,6 +148,10 @@ sed -i '0,/<route url="\/V1\/store\/storeViews" method="GET">/s//<route url="\/V
 cp vendor/ampersand/upgrade-patch-helper-test-module/src/module/etc/schema.after.graphqls vendor/ampersand/upgrade-patch-helper-test-module/src/module/etc/schema.graphqls
 sed -i '0,/storeConfig : StoreConfig /s//storeConfig : StoreConfig! /' vendor/magento/module-store-graph-ql/etc/schema.graphqls
 sed -i '0,/): CustomerToken @resolver/s//): CustomerToken! @resolver/' vendor/magento/module-customer-graph-ql/etc/schema.graphqls
+if [[ "${WITH_HYVA:-1}" == "1" ]]; then
+  cp vendor/hyva-themes/upgrade-patch-helper-test-cms/src/module/etc/hyva_cms/components.after.json vendor/hyva-themes/upgrade-patch-helper-test-cms/src/module/etc/hyva_cms/components.json
+  cp vendor/hyva-themes/upgrade-patch-helper-test-cms/src/module/etc/hyva_cms/content-fields.after.json vendor/hyva-themes/upgrade-patch-helper-test-cms/src/module/etc/hyva_cms/content-fields.json
+fi
 rm vendor/ampersand/upgrade-patch-helper-test-module-to-be-removed/src/module/etc/db_schema.xml
 cp vendor/ampersand/upgrade-patch-helper-test-module/src/module/etc/adminhtml/system/functional.after.xml vendor/ampersand/upgrade-patch-helper-test-module/src/module/etc/adminhtml/system/functional.xml
 
@@ -179,6 +187,12 @@ echo "#"  >> vendor/magento/module-customer/view/frontend/web/js/model/authentic
 
 # Ensure change in catalog default.xml layout
 echo "<!-- -->" >> vendor/magento/module-catalog/view/frontend/layout/default.xml
+# Keep this ignored-layout fixture comment-only for the alpha1 no-DB scenarios.
+# Its real upgrade adds an ifconfig attribute; use the frozen layout on the
+# upgraded side so that change does not replace the intended IGNR coverage.
+if [[ "$MAGE_TO" == "2.4.10-alpha1" && "$NODB" == "1" ]]; then
+  cp vendor_orig/magento/module-catalog/view/frontend/layout/catalog_category_view_type_default.xml vendor/magento/module-catalog/view/frontend/layout/catalog_category_view_type_default.xml
+fi
 echo "<!-- -->" >> vendor/magento/module-catalog/view/frontend/layout/catalog_category_view_type_default.xml
 echo "<!-- -->" >> vendor/magento/module-rss/view/frontend/layout/default.xml
 

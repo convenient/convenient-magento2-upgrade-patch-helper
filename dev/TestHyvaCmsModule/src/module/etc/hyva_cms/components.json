@@ -1,0 +1,16 @@
+{
+  "article_teaser": {
+    "label": "Article teaser"
+  },
+  "product_summary": {
+    "label": "Product summary",
+    "content": {
+      "layout": "compact"
+    }
+  },
+  "content_block": {
+    "content": {
+      "includes": "Hyva_TestCms::etc/hyva_cms/content-fields.json"
+    }
+  }
+}

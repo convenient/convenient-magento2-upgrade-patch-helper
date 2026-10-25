@@ -1,0 +1,16 @@
+{
+  "product_summary": {
+    "label": "Product summary",
+    "content": {
+      "layout": "expanded"
+    }
+  },
+  "category_intro": {
+    "label": "Category introduction"
+  },
+  "content_block": {
+    "content": {
+      "includes": "Hyva_TestCms::etc/hyva_cms/content-fields.json"
+    }
+  }
+}

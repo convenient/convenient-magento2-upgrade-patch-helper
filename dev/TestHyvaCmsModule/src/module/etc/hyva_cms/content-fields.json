@@ -1,0 +1,10 @@
+{
+  "subtitle": {
+    "type": "text",
+    "label": "Subtitle"
+  },
+  "body": {
+    "type": "text",
+    "label": "Body copy"
+  }
+}

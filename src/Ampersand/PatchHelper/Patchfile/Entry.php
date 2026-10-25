@@ -6,6 +6,7 @@ use Ampersand\PatchHelper\Exception\PluginDetectionException;
 use Ampersand\PatchHelper\Patchfile\Entry\ContentSecurityDefinitions;
 use Ampersand\PatchHelper\Patchfile\Entry\DatabaseTableDefinitions;
 use Ampersand\PatchHelper\Patchfile\Entry\GraphQLSchemaDefinitions;
+use Ampersand\PatchHelper\Patchfile\Entry\HyvaCmsDefinitions;
 use Ampersand\PatchHelper\Patchfile\Entry\InterceptablePhpFunctions;
 use Ampersand\PatchHelper\Patchfile\Entry\QueueConsumers;
 use Ampersand\PatchHelper\Patchfile\Entry\SystemConfigDefinitions;
@@ -43,6 +44,9 @@ class Entry
 
     /** @var GraphQLSchemaDefinitions|null */
     private $graphQLSchemaDefinitions;
+
+    /** @var HyvaCmsDefinitions|null */
+    private $hyvaCmsDefinitions;
 
     /**
      * @var string[]
@@ -488,6 +492,27 @@ class Entry
     public function getGraphQLSchemaDefinitionsFromNewFile()
     {
         return $this->getGraphQLSchemaDefinitions()->getDefinitions($this->newFilePath);
+    }
+
+    /** @return array<string, mixed> */
+    public function getHyvaCmsDefinitionsFromOriginalFile()
+    {
+        return $this->getHyvaCmsDefinitions()->getDefinitions($this->originalFilePath);
+    }
+
+    /** @return array<string, mixed> */
+    public function getHyvaCmsDefinitionsFromNewFile()
+    {
+        return $this->getHyvaCmsDefinitions()->getDefinitions($this->newFilePath);
+    }
+
+    /** @return HyvaCmsDefinitions */
+    private function getHyvaCmsDefinitions()
+    {
+        if ($this->hyvaCmsDefinitions === null) {
+            $this->hyvaCmsDefinitions = new HyvaCmsDefinitions($this->directory);
+        }
+        return $this->hyvaCmsDefinitions;
     }
 
     /**

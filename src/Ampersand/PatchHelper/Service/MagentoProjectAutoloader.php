@@ -43,6 +43,11 @@ class MagentoProjectAutoloader
             return self::getBootstrapWarning("Magento bootstrap is missing or unreadable: $bootstrapPath");
         }
 
+        $autoloadPath = $projectPath . DIRECTORY_SEPARATOR . 'vendor' . DIRECTORY_SEPARATOR . 'autoload.php';
+        if (!is_file($autoloadPath) || !is_readable($autoloadPath)) {
+            return self::getBootstrapWarning("Vendor autoload is missing or unreadable: $autoloadPath");
+        }
+
         try {
             require_once $bootstrapPath;
         } catch (\Throwable $throwable) {

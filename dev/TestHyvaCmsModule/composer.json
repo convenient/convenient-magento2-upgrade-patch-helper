@@ -1,0 +1,9 @@
+{
+  "name": "hyva-themes/upgrade-patch-helper-test-cms",
+  "type": "magento2-module",
+  "autoload": {
+    "files": [
+      "src/registration.php"
+    ]
+  }
+}

@@ -39,6 +39,12 @@ class Checks
     public const TYPE_SETUP_PATCH_DATA = 'Setup Patch Data';
     public const TYPE_SETUP_PATCH_SCHEMA = 'Setup Patch Schema';
     public const TYPE_SETUP_SCRIPT = 'Setup Script';
+    public const TYPE_HYVA_CMS_ADDED = 'Hyva CMS added';
+    public const TYPE_HYVA_CMS_REMOVED = 'Hyva CMS removed';
+    public const TYPE_HYVA_CMS_CHANGED = 'Hyva CMS changed';
+    public const TYPE_HYVA_CMS_INCLUDE_ADDED = 'Hyva CMS Include added';
+    public const TYPE_HYVA_CMS_INCLUDE_REMOVED = 'Hyva CMS Include removed';
+    public const TYPE_HYVA_CMS_INCLUDE_CHANGED = 'Hyva CMS Include changed';
 
     /**
      * @var string[]
@@ -91,5 +97,11 @@ class Checks
         self::TYPE_METHOD_PLUGIN,
         self::TYPE_METHOD_PLUGIN_DISABLED,
         self::TYPE_METHOD_PLUGIN_ENABLED,
+        self::TYPE_HYVA_CMS_ADDED,
+        self::TYPE_HYVA_CMS_REMOVED,
+        self::TYPE_HYVA_CMS_CHANGED,
+        self::TYPE_HYVA_CMS_INCLUDE_ADDED,
+        self::TYPE_HYVA_CMS_INCLUDE_REMOVED,
+        self::TYPE_HYVA_CMS_INCLUDE_CHANGED,
     ];
 }

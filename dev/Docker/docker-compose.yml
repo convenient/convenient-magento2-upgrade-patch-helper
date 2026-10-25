@@ -2,7 +2,6 @@ volumes:
   excludedvol:
     driver: local
 
-version: '3'
 services:
   elasticsearch:
     container_name: uphelper-elasticsearch
@@ -55,7 +54,7 @@ services:
       - PHP_FROM=7.2
       - MAGE_FROM=2.3.5
       - PHP_TO=8.5
-      - MAGE_TO=2.4.9-beta1
+      - MAGE_TO=2.4.10-alpha1
       - NODB=1
   m24nodbnohyva:
     depends_on:
@@ -73,7 +72,7 @@ services:
       - PHP_FROM=7.2
       - MAGE_FROM=2.3.5
       - PHP_TO=8.5
-      - MAGE_TO=2.4.9-beta1
+      - MAGE_TO=2.4.10-alpha1
       - NODB=1
       - WITH_HYVA=0
   m24:

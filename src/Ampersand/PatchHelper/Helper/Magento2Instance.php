@@ -4,6 +4,7 @@ namespace Ampersand\PatchHelper\Helper;
 
 use Ampersand\PatchHelper\Helper\Magento2Instance\DatabaseSchemaDefinitions;
 use Ampersand\PatchHelper\Helper\Magento2Instance\GraphQlSchemaDefinitions;
+use Ampersand\PatchHelper\Helper\Magento2Instance\HyvaCmsDefinitions;
 use Ampersand\PatchHelper\Helper\Magento2Instance\WebApiRestDefinitions;
 use Magento\Framework\App\Area;
 use Magento\Framework\App\Config\ScopeConfigInterface;
@@ -68,6 +69,15 @@ class Magento2Instance
 
     /** @var array<string, array<int, string>> */
     private $graphQlRootFieldDefinitions = [];
+
+    /** @var array<string, array<string, mixed>> */
+    private $hyvaCmsComponentDefinitions = [];
+
+    /** @var array<string, string> */
+    private $hyvaCmsIncludePaths = [];
+
+    /** @var array<string, array<string, mixed>> */
+    private $hyvaCmsFragments = [];
 
     /** @var  array<string, array<string, mixed>> */
     private $areaConfig = [];
@@ -153,6 +163,12 @@ class Magento2Instance
         }
 
         ksort($this->listOfPathsToModules);
+
+        try {
+            $this->prepareHyvaCmsData();
+        } catch (\Throwable $throwable) {
+            $this->bootErrors[] = $throwable;
+        }
 
         $componentRegistrar = $objectManager->get(ComponentRegistrar::class);
         foreach ($componentRegistrar->getPaths(ComponentRegistrar::LIBRARY) as $lib => $libPath) {
@@ -431,6 +447,34 @@ class Magento2Instance
     public function getGraphQlRootFieldDefinitions()
     {
         return $this->graphQlRootFieldDefinitions;
+    }
+
+    /** @return array<string, array<string, mixed>> */
+    public function getHyvaCmsComponentDefinitions()
+    {
+        return $this->hyvaCmsComponentDefinitions;
+    }
+
+    /** @return array<string, string> */
+    public function getHyvaCmsIncludePaths()
+    {
+        return $this->hyvaCmsIncludePaths;
+    }
+
+    /** @return array<string, array<string, mixed>> */
+    public function getHyvaCmsFragments()
+    {
+        return $this->hyvaCmsFragments;
+    }
+
+    /** @return void */
+    private function prepareHyvaCmsData()
+    {
+        $definitions = new HyvaCmsDefinitions($this->getMagentoRoot(), $this->listOfPathsToModules);
+        $definitions->prepare();
+        $this->hyvaCmsComponentDefinitions = $definitions->getComponents();
+        $this->hyvaCmsIncludePaths = $definitions->getIncludePaths();
+        $this->hyvaCmsFragments = $definitions->getFragments();
     }
 
     /**
