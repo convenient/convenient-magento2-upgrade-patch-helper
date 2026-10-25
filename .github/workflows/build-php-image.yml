@@ -1,0 +1,64 @@
+name: Build and publish PHP image
+
+on:
+  workflow_dispatch:
+    inputs:
+      image:
+        description: 'Full Docker Hub image and tag, e.g. foobar/upgrade-patch-helper:php-2099-12-25'
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: build-php-image-${{ inputs.image }}
+  cancel-in-progress: false
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+
+    steps:
+      - name: Validate image and Docker Hub credentials
+        env:
+          IMAGE: ${{ inputs.image }}
+          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+          DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+        shell: bash
+        run: |
+          image_pattern='^[a-z0-9][a-z0-9_-]*/[a-z0-9]+(([._]|__|-+)[a-z0-9]+)*:[a-zA-Z0-9_][a-zA-Z0-9_.-]{0,127}$'
+          if [[ ! "$IMAGE" =~ $image_pattern ]]; then
+            echo '::error::Provide one Docker Hub image as namespace/repository:tag, with a tag of 1 to 128 characters.'
+            exit 1
+          fi
+          if [[ -z "$DOCKERHUB_USERNAME" || -z "$DOCKERHUB_TOKEN" ]]; then
+            echo '::error::Set DOCKERHUB_USERNAME and DOCKERHUB_TOKEN repository secrets with push access to the requested image repository.'
+            exit 1
+          fi
+
+      - name: Checkout code
+        uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v4
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push PHP image
+        uses: docker/build-push-action@v7
+        with:
+          context: ./dev/Docker
+          file: ./dev/Docker/Dockerfile
+          platforms: linux/amd64
+          no-cache: true
+          pull: true
+          push: true
+          tags: ${{ inputs.image }}

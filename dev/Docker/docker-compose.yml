@@ -23,7 +23,7 @@ services:
   m2451nodb:
     depends_on:
       - elasticsearch
-    image: convenient/upgrade-patch-helper:php-2026-03-19
+    image: convenient/upgrade-patch-helper:php-2026-10-25
     platform: linux/amd64
     container_name: uphelper-m2451nodb
     stdin_open: true
@@ -41,7 +41,7 @@ services:
   m24nodb:
     depends_on:
       - elasticsearch8
-    image: convenient/upgrade-patch-helper:php-2026-03-19
+    image: convenient/upgrade-patch-helper:php-2026-10-25
     platform: linux/amd64
     container_name: uphelper-m24nodb
     stdin_open: true
@@ -59,7 +59,7 @@ services:
   m24nodbnohyva:
     depends_on:
       - elasticsearch8
-    image: convenient/upgrade-patch-helper:php-2026-03-19
+    image: convenient/upgrade-patch-helper:php-2026-10-25
     platform: linux/amd64
     container_name: uphelper-m24nodbnohyva
     stdin_open: true
@@ -79,7 +79,7 @@ services:
     depends_on:
       - elasticsearch8
       - mysql57
-    image: convenient/upgrade-patch-helper:php-2026-03-19
+    image: convenient/upgrade-patch-helper:php-2026-10-25
     platform: linux/amd64
     container_name: uphelper-m24
     stdin_open: true
@@ -97,7 +97,7 @@ services:
   m23:
     depends_on:
       - mysql57
-    image: convenient/upgrade-patch-helper:php-2026-03-19
+    image: convenient/upgrade-patch-helper:php-2026-10-25
     platform: linux/amd64
     container_name: uphelper-m23
     stdin_open: true
