@@ -366,7 +366,8 @@ class FunctionalTests extends \PHPUnit\Framework\TestCase
      */
     private function assertReportOutput($expectedOutputFilepath, $output)
     {
-        $expectedOutput = $this->fileGetContents($expectedOutputFilepath);
+        $expectedOutput = $this->normaliseReportOutput($this->fileGetContents($expectedOutputFilepath));
+        $output = $this->normaliseReportOutput($output);
         if ($expectedOutput === $output) {
             return;
         }
@@ -384,6 +385,13 @@ class FunctionalTests extends \PHPUnit\Framework\TestCase
         $this->fail(
             "Report output did not match. Actual output saved to $actualOutputPath" . PHP_EOL . PHP_EOL . $diff
         );
+    }
+
+    private function normaliseReportOutput($output)
+    {
+        return trim(implode(PHP_EOL, array_filter(explode(PHP_EOL, $output), function ($line) {
+            return strpos($line, 'For docs on each check see') !== 0;
+        })));
     }
 
     /**

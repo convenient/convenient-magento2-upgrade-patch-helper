@@ -1,92 +1,89 @@
-# ampersand-magento2-upgrade-patch-helper
+# Fork Notice
 
-Helper scripts to aid upgrading magento 2 websites, or when upgrading a magento module
+This is a fork of https://github.com/idhlagency/ampersand-magento2-upgrade-patch-helper with ongoing bugfixes, quality of life improvements, and feature development. When upstream pull requests start activating again the fixes here can be delivered.
 
-[![Build Status](https://travis-ci.org/AmpersandHQ/ampersand-magento2-upgrade-patch-helper.svg?branch=master)](https://app.travis-ci.com/github/AmpersandHQ/ampersand-magento2-upgrade-patch-helper)
+All changes can be seen here https://github.com/convenient/convenient-magento2-upgrade-patch-helper/compare/19c4fbb...long-overdue-maintenance
 
-This tool looks for files which have been modified as part of an upgrade and highlights any overrides for those specific files in your magento instance. This allows you to focus in on only the things that have changed, and gives you an actionable list of things to review specifically for your site. 
+## Fork Notice - Bugfixes
 
-This tool does a number of checks split into three categories
-- `WARN` - Warning level items are something that you should review and often require direct code changes. Something you or a third party have customised may need adjustment or no longer be valid based on the upgraded codebase.
-- `INFO` - Information level items are something that you may want to know, but there is not always direct action necessary. These items are hidden by default and exposed with `--show-info`.
-- `IGNR` - Ignore level items are something that you can ignore. The vendor file change which triggered the analysis was actually a comment/whitespace or other non functional change so there is nothing to check. These items are hidden by default and exposed with `--show-ignore`.
+- Fixed Symfony Console autoloading conflicts to support a wider array of Magento versions.
+- Improved Hyvä compatibility module resolution for template and JavaScript overrides.
+- Improved Hyvä theme fallback detection when store configuration is unavailable.
 
-This tool checks for the following
-- Preferences (in global/frontend/adminhtml di.xml)
-- Overrides 
-  - phtml / js
-  - layout xml
-  - html (knockout templates)
-- Plugins for methods which have been affected by the upgrade.
-- Queue consumers which were added or removed
-- Declarative schema 
-  - db_schema.xml table additions/removals/changes
-  - Setup Patch Data patches
-  - Setup Schema Data patches
-- Setup Scripts
+## Fork Notice - New Checks
+
+See [Checks available](docs/CHECKS_AVAILABLE.md) for detailed reporting behaviour, examples and review guidance.
+
+| Level | Check name | Description |
+| --- | --- | --- |
+| INFO | System Configuration | Added, removed and changed fields. |
+| INFO | Content Security Policy | Added, removed and changed whitelist entries. |
+| INFO / WARN | REST WebAPI | Added, removed and changed routes, with warnings for overlapping customisations. |
+| INFO / WARN | GraphQL | Added, removed and changed queries and mutations, with warnings for overlapping customisations. |
+| WARN | Hyvä CMS Components | Added, removed and changed components with overlapping declarations. |
+| WARN | Hyvä CMS JSON Includes | Added, removed and changed include fields that overlap with custom component definitions, plus references to removed fragments. |
+
+## Fork Notice - Improvements
+
+- Added agent guidance and skills for implementing and maintaining upgrade checks.
+- Added scanning of custom Magento area codes for preferences and plugins.
+- Refactored check-specific parsing into dedicated classes.
+- Expanded unit and functional coverage, including installations without Hyvä, and removed the Magento 2.2 fixture.
+- Updated the latest no-DB fixtures to Magento 2.4.10-alpha1 on PHP 8.5.
+- Updated Docker PHP builds and disabled session upload progress by default.
+- Documentation updates
+
+# ampersand-magento2-upgrade-patch-helper 
+
+For Magento, Adobe Commerce, and Hyvä upgrades, this tool cuts through the noise and highlights what matters.
+
+It compares the old and new `vendor/` directories, then flags only the customisations you’ve overridden so you’re not stuck reviewing hundreds of files you didn’t touch.
+
+## What It Detects
+
+This tool covers all major Magento customisations and extension points
+- Admin panel store configurations
+- Content Security Policy declarations
+- REST Web API and GraphQL schema changes
+- PHP preferences and plugins
+- Template, layout, and JS overrides
+- Queue consumers
+- Hyvä CMS components
+- Database schema and data patches
 
 For a detailed breakdown of each check, an example, and the recommended actions please see [docs/CHECKS_AVAILABLE.md](./docs/CHECKS_AVAILABLE.md)
 
-If you have any improvements please raise a PR or an Issue.
+## Analyse a patch or upgrade
 
-## Supplementary tooling
+Use this during any upgrade, patch, or module update to identify exactly what needs review.
 
-- Gui https://github.com/elgentos/magento2-upgrade-gui
-- Github action  https://github.com/convenient/magento2-upgrade-patch-helper-github-action
+**Run locally only**. See [docs/USAGE.md](./docs/USAGE.md) for a full walkthrough.
 
-## How to use
-
-All the below should be used on a local setup, never do any of this anywhere near a production website.
-
-It is most reliable if you use this when the instance has been built and is plugged into a database just in case you have theme configuration stored there. Running this without it being plugged into a database could cause some of the theme analysis to be missed.
-
-### Step 1 - Composer update the dependencies then generate a patch
-
-In your project `composer install` and move the original vendor directory to a backup location
-
-```
+```bash
+# Prepare your original vendor directory
 cd /path/to/magento2/
 composer install
 mv vendor/ vendor_orig/
-```
 
-Update your magento version (or third party module) to the one required, with b2b or other extensions if applicable.
+# perform your patch/update/upgrade
+# you can update a module, apply an isolated .patch file, or perform a full magento upgrade
 
-```bash
-composer install
-composer require magento/product-enterprise-edition 2.2.6 --no-update
-composer require magento/extension-b2b 1.0.6 --no-update
-composer require thirdparty/some-module "^2.0" 
-composer update magento/extension-b2b magento/product-enterprise-edition thirdparty/some-module --with-dependencies
-```
-
-At this point you may receive errors of incompatible modules, often they are tied to a specific version of magento. Correct the module dependencies and composer require the updated version until you can run `composer install` successfully.
-
-Once you have a completed the composer steps you can create a diff which can be analysed.
-
-```bash
+# generate the patch to analyse
 diff -ur -N vendor_orig/ vendor/ > vendor.patch
-```
 
-By generating the diff in this manner (as opposed to using `wget https://github.com/magento/magento2/compare/2.1.15...2.1.16.diff`) we can guarantee that all enterprise and magento extensions are also covered in one patch file.
-
-### Step 2 - Parse the patch file
-
-In a clone of this repository you can analyse the project and patch file.
-
-
-```php
-git clone https://github.com/AmpersandHQ/ampersand-magento2-upgrade-patch-helper
-cd ampersand-magento2-upgrade-patch-helper
+# install this tool
+cd -
+git clone https://github.com/convenient/convenient-magento2-upgrade-patch-helper # todo use the fork url for now, revert to upstream url for merging
+cd convenient-magento2-upgrade-patch-helper
 composer install
+
+# run this tool
 php bin/patch-helper.php analyse /path/to/magento2/
 ```
 
 This will output a grid of files that need to be reviewed and possibly updated to match the changes defined in the newly generated `vendor_files_to_check.patch`.
 
-For those of you who would prefer to work over these results in a GUI rather than a CLI you may want to check out [elgentos/magento2-upgrade-gui](https://github.com/elgentos/magento2-upgrade-gui)
-
-```
+```text
 +-------+--------------------------+----------------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------+
 | Level | Type                     | File                                                                                         | To Check                                                                                    |
 +-------+--------------------------+----------------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------+
@@ -95,6 +92,18 @@ For those of you who would prefer to work over these results in a GUI rather tha
 | WARN  | DB schema removed        | vendor/ampersand/upgrade-patch-helper-test-module-to-be-removed/src/module/etc/db_schema.xml | catalog_category_entity                                                                     |
 | WARN  | DB schema removed        | vendor/ampersand/upgrade-patch-helper-test-module/src/module/etc/db_schema.xml               | wishlist                                                                                    |
 | WARN  | DB schema target changed | vendor/magento/module-wishlist/etc/db_schema.xml                                             | app/code/Ampersand/Test/etc/db_schema.xml (wishlist_item)                                   |
+| WARN  | GraphQL Mutation added   | vendor/acme/module-api/etc/schema.graphqls                                                   | app/code/Ampersand/Test/etc/schema.graphqls (Mutation addToWishlist)                        |
+| WARN  | GraphQL Mutation changed | vendor/acme/module-api/etc/schema.graphqls                                                   | app/code/Ampersand/Test/etc/schema.graphqls (Mutation updateWishlistItem)                   |
+| WARN  | GraphQL Mutation removed | vendor/acme/module-api/etc/schema.graphqls                                                   | app/code/Ampersand/Test/etc/schema.graphqls (Mutation removeFromWishlist)                   |
+| WARN  | GraphQL Query added      | vendor/acme/module-api/etc/schema.graphqls                                                   | app/code/Ampersand/Test/etc/schema.graphqls (Query wishlistItems)                           |
+| WARN  | GraphQL Query changed    | vendor/acme/module-api/etc/schema.graphqls                                                   | app/code/Ampersand/Test/etc/schema.graphqls (Query customerWishlist)                        |
+| WARN  | GraphQL Query removed    | vendor/acme/module-api/etc/schema.graphqls                                                   | app/code/Ampersand/Test/etc/schema.graphqls (Query sharedWishlist)                          |
+| WARN  | Hyva CMS Include added   | vendor/acme/module-cms/etc/hyva_cms/content-fields.json                                      | app/code/Ampersand/Test/etc/hyva_cms/components.json (category_intro)                       |
+| WARN  | Hyva CMS Include changed | vendor/acme/module-cms/etc/hyva_cms/content-fields.json                                      | app/code/Ampersand/Test/etc/hyva_cms/components.json (article_content)                      |
+| WARN  | Hyva CMS Include removed | vendor/acme/module-cms/etc/hyva_cms/content-fields.json                                      | app/code/Ampersand/Test/etc/hyva_cms/components.json (product_summary)                      |
+| WARN  | Hyva CMS added           | vendor/acme/module-cms/etc/hyva_cms/components.json                                          | app/code/Ampersand/Test/etc/hyva_cms/components.json (category_intro)                       |
+| WARN  | Hyva CMS changed         | vendor/acme/module-cms/etc/hyva_cms/components.json                                          | app/code/Ampersand/Test/etc/hyva_cms/components.json (product_summary)                      |
+| WARN  | Hyva CMS removed         | vendor/acme/module-cms/etc/hyva_cms/components.json                                          | app/code/Ampersand/Test/etc/hyva_cms/components.json (article_teaser)                       |
 | WARN  | Override (phtml/js/html) | vendor/magento/module-catalog/view/frontend/layout/catalog_category_view.xml                 | app/design/frontend/Ampersand/theme/Magento_Catalog/layout/catalog_category_view.xml        |
 | WARN  | Override (phtml/js/html) | vendor/magento/module-checkout/view/frontend/templates/cart/form.phtml                       | app/design/frontend/Ampersand/theme/Magento_Checkout/templates/cart/form.phtml              |
 | WARN  | Override (phtml/js/html) | vendor/magento/module-checkout/view/frontend/web/js/model/place-order.js                     | app/design/frontend/Ampersand/theme/Magento_Checkout/web/js/model/place-order.js            |
@@ -108,75 +117,12 @@ For those of you who would prefer to work over these results in a GUI rather tha
 | WARN  | Preference               | vendor/magento/module-advanced-pricing-import-export/Model/Export/AdvancedPricing.php        | Ampersand\Test\Model\Admin\Export\AdvancedPricing                                           |
 | WARN  | Preference               | vendor/magento/module-weee/Model/Total/Quote/Weee.php                                        | Ampersand\Test\Model\Frontend\Total\Quote\Weee                                              |
 | WARN  | Preference               | vendor/magento/module-weee/Model/Total/Quote/Weee.php                                        | Ampersand\Test\Model\Total\Quote\Weee                                                       |
+| WARN  | REST WebAPI added        | vendor/acme/module-api/etc/webapi.xml                                                        | vendor/acme/module-custom-api/etc/webapi.xml (POST /V1/upgrade-helper/added)                |
+| WARN  | REST WebAPI changed      | vendor/acme/module-api/etc/webapi.xml                                                        | vendor/acme/module-custom-api/etc/webapi.xml (GET /V1/upgrade-helper/changed)               |
+| WARN  | REST WebAPI removed      | vendor/acme/module-api/etc/webapi.xml                                                        | vendor/acme/module-custom-api/etc/webapi.xml (GET /V1/upgrade-helper/removed)               |
 | WARN  | Redundant Override       | vendor/ampersand/some-nice-theme/Magento_Ui/web/templates/redundant.html                     | app/design/frontend/Ampersand/theme/Magento_Ui/web/templates/redundant.html                 |
 +-------+--------------------------+----------------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------+
-WARN count: 18
+WARN count: 34
 INFO count: 381 (to view re-run this tool with --show-info)
-You should review the above 18 items alongside ./dev/instances/magentom24nodb/vendor_files_to_check.patch
-```
-
-## Additional options
-
-### --show-info
-
-```
-php bin/patch-helper.php analyse /path/to/magento2/ --show-info
-```
-
-Show all `INFO` level items, this can be a lot more output and give you a broader view of the system changes.
-
-### --show-ignore
-
-```
-php bin/patch-helper.php analyse /path/to/magento2/ --show-ignore
-```
-
-Show all `IGNR` level items, see https://github.com/AmpersandHQ/ampersand-magento2-upgrade-patch-helper/blob/master/docs/CHECKS_AVAILABLE.md#ignr---ignored-warnings
-
-### --auto-theme-update
-
-```
-php bin/patch-helper.php analyse /path/to/magento2/ --auto-theme-update 5
-```
-
-For template files the optional argument will automatically apply the changes to the local theme files.
-
-The fuzz factor defines the level of strict comparing. With a fuzz factor of 0 only changes, where all lines of the context match, are applied. 
-With a factor of 1 the first and the last line of the context is ignored. With a factor of n accordingly the first n and the last n lines.
-If a change could not be applied, a .rej file with the remaining changes is automatically created in the folder of the template file. 
-
-As it is recommended to check all changes afterwards anyway, a big fuzz factor can be chosen.
-
-
-### --vendor-namespaces
-
-```
-php bin/patch-helper.php analyse /path/to/magento2/ analyse --vendor-namespaces Ampersand,Amazon
-```
-
-This option allows you to filter the results to only the defined list of namespaces. Useful when you only care about overrides in your project namespace.
-
-
-### --sort-by-type
-
-```
-php bin/patch-helper.php analyse /path/to/magento2/ --sort-by-type
-```
-
-Sorts the output table by the type of override
-
-### --phpstorm-threeway-diff-commands
-
-
-```
-php bin/patch-helper.php analyse /path/to/magento2/ --phpstorm-threeway-diff-commands
-```
-
-Also print out a series of threeway diff commands for use in phpstorm
-https://www.jetbrains.com/help/phpstorm/command-line-differences-viewer.html
-
-For example 
-```
-Outputting diff commands below
-phpstorm diff vendor/ampersand/upgrade-patch-helper-test-module/src/module/Api/ExampleInterface.php app/code/Ampersand/Test/Model/Example.php vendor_orig/ampersand/upgrade-patch-helper-test-module/src/module/Api/ExampleInterface.php
+You should review the above 34 items alongside ./dev/instances/magentom24nodb/vendor_files_to_check.patch
 ```

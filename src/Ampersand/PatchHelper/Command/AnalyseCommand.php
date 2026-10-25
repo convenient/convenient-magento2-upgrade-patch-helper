@@ -18,8 +18,13 @@ use Symfony\Component\Console\Output\OutputInterface as Output;
 
 class AnalyseCommand extends Command
 {
+    // TODO Revert this URL before contributing upstream
+//    public const DOCS_URL
+    // phpcs:ignore Generic.Files.LineLength.TooLong
+//        = 'https://github.com/AmpersandHQ/ampersand-magento2-upgrade-patch-helper/blob/master/docs/CHECKS_AVAILABLE.md';
     public const DOCS_URL
-        = 'https://github.com/AmpersandHQ/ampersand-magento2-upgrade-patch-helper/blob/master/docs/CHECKS_AVAILABLE.md';
+        // phpcs:ignore Generic.Files.LineLength.TooLong
+        = 'https://github.com/convenient/convenient-magento2-upgrade-patch-helper/blob/long-overdue-maintenance/docs/CHECKS_AVAILABLE.md';
 
     /**
      * @inheritDoc
