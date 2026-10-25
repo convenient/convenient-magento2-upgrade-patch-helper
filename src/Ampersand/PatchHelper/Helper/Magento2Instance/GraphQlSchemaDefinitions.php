@@ -28,15 +28,20 @@ class GraphQlSchemaDefinitions
     /**
      * Prepare a map of GraphQL root-field identities to every schema.graphqls that contributes to them.
      *
-     * @return void
+     * @return \Throwable[] Failures for individual files; valid contributors are retained.
      */
     public function prepare()
     {
+        $errors = [];
         $graphQlDefinitions = new PatchGraphQlSchemaDefinitions('');
         foreach ($this->schemaFiles as $schemaFile) {
-            $relativeFile = sanitize_filepath($this->rootDir, $schemaFile);
-            foreach ($graphQlDefinitions->getDefinitionsFromFilepath($schemaFile) as $identity => $definition) {
-                $this->rootFieldDefinitions[$identity][] = $relativeFile;
+            try {
+                $relativeFile = sanitize_filepath($this->rootDir, $schemaFile);
+                foreach ($graphQlDefinitions->getDefinitionsFromFilepath($schemaFile) as $identity => $definition) {
+                    $this->rootFieldDefinitions[$identity][] = $relativeFile;
+                }
+            } catch (\Throwable $throwable) {
+                $errors[] = new \RuntimeException($schemaFile . ': ' . $throwable->getMessage(), 0, $throwable);
             }
         }
         unset($graphQlDefinitions, $schemaFile, $relativeFile, $identity, $definition);
@@ -47,6 +52,7 @@ class GraphQlSchemaDefinitions
             sort($files);
         }
         unset($files);
+        return $errors;
     }
 
     /**

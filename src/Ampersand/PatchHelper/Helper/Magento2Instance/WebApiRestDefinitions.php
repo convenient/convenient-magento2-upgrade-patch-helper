@@ -28,7 +28,7 @@ class WebApiRestDefinitions
     /**
      * Prepare a map of REST route identities to every webapi.xml that contributes to them.
      *
-     * @return void
+     * @return \Throwable[] Failures for individual files; valid contributors are retained.
      */
     public function prepare()
     {
@@ -44,11 +44,16 @@ class WebApiRestDefinitions
             return true;
         }));
 
+        $errors = [];
         $webApiRestDefinitions = new PatchWebApiRestDefinitions('');
         foreach ($webApiFiles as $webApiFile) {
-            $relativeFile = sanitize_filepath($this->rootDir, $webApiFile);
-            foreach ($webApiRestDefinitions->getDefinitionsFromFilepath($webApiFile) as $identity => $definition) {
-                $this->routeDefinitions[$identity][] = $relativeFile;
+            try {
+                $relativeFile = sanitize_filepath($this->rootDir, $webApiFile);
+                foreach ($webApiRestDefinitions->getDefinitionsFromFilepath($webApiFile) as $identity => $definition) {
+                    $this->routeDefinitions[$identity][] = $relativeFile;
+                }
+            } catch (\Throwable $throwable) {
+                $errors[] = new \RuntimeException($webApiFile . ': ' . $throwable->getMessage(), 0, $throwable);
             }
         }
         unset($webApiRestDefinitions, $webApiFile, $relativeFile, $identity, $definition);
@@ -59,6 +64,7 @@ class WebApiRestDefinitions
             sort($files);
         }
         unset($files);
+        return $errors;
     }
 
     /**

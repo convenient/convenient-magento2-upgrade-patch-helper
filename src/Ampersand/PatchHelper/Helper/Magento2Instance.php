@@ -486,7 +486,7 @@ class Magento2Instance
     {
         $rootDir = $this->objectManager->get(DirectoryList::class)->getRoot();
         $definitions = new WebApiRestDefinitions($rootDir, $this->getListOfXmlFiles());
-        $definitions->prepare();
+        $this->bootErrors = array_merge($this->bootErrors, $definitions->prepare());
         $this->webApiRestRouteDefinitions = $definitions->getRouteDefinitions();
     }
 
@@ -500,7 +500,7 @@ class Magento2Instance
         $rootDir = $this->objectManager->get(DirectoryList::class)->getRoot();
         $this->listGraphQlSchemaFiles([$rootDir . '/app', $rootDir . '/vendor']);
         $definitions = new GraphQlSchemaDefinitions($rootDir, $this->listOfGraphQlSchemaFiles);
-        $definitions->prepare();
+        $this->bootErrors = array_merge($this->bootErrors, $definitions->prepare());
         $this->graphQlRootFieldDefinitions = $definitions->getRootFieldDefinitions();
     }
 

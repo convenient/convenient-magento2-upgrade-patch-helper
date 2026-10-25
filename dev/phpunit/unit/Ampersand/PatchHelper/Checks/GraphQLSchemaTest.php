@@ -95,6 +95,24 @@ class GraphQLSchemaTest extends \PHPUnit\Framework\TestCase
         $this->assertSame([], $this->checkEntry('module-normalized'));
     }
 
+    public function testNullValuesAreComparedWithoutWarningsUnderStrictErrorHandling()
+    {
+        set_error_handler(function ($severity, $message, $file, $line) {
+            throw new \ErrorException($message, $severity, $severity, $file, $line);
+        });
+        try {
+            $this->assertSame([
+                'GraphQL Query changed' => [
+                    'Query defaultValue' => 'Query defaultValue',
+                    'Query directiveValue' => 'Query directiveValue',
+                    'Query nestedValues' => 'Query nestedValues'
+                ]
+            ], $this->checkEntry('module-null-values'));
+        } finally {
+            restore_error_handler();
+        }
+    }
+
     public function testPartialAndAbsentRootDeclarationsAreValid()
     {
         $this->assertSame(

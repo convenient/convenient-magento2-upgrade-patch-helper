@@ -457,6 +457,9 @@ class GraphQLSchemaDefinitions
     private function getValue($value)
     {
         $type = get_class($value);
+        if ($value instanceof \GraphQL\Language\AST\NullValueNode) {
+            return ['type' => $type, 'value' => null];
+        }
         if ($value instanceof \GraphQL\Language\AST\ListValueNode) {
             $values = [];
             foreach ($value->values as $item) {

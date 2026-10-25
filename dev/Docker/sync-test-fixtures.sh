@@ -38,9 +38,25 @@ validate_relative_path() {
     done
 }
 
+reject_symlink_path() {
+    local path="$1"
+
+    # Missing components are allowed for new files, but no existing component
+    # below the repository mount may redirect reads or writes through a symlink.
+    while [[ "$path" == "$repository_root" || "$path" == "$repository_root/"* ]]; do
+        if [[ -L "$path" ]]; then
+            echo "Refusing symlink in fixture path: $path" >&2
+            return 1
+        fi
+        [[ "$path" == "$repository_root" ]] && break
+        path="${path%/*}"
+    done
+}
+
 package_destination() {
     local composer_file="$1"
 
+    reject_symlink_path "$composer_file" || return 1
     php -r '
         try {
             $composer = json_decode(file_get_contents($argv[1]), true, 512, JSON_THROW_ON_ERROR);
@@ -85,10 +101,11 @@ destination_for_path() {
     suffix="${fixture_path#dev/${fixture_name}/}"
     fixture_root="${repository_root}/dev/${fixture_name}"
 
+    reject_symlink_path "${repository_root}/${fixture_path}" || return 1
     if [[ "$fixture_name" == TestModule && "$suffix" == app/* ]]; then
         destination="${instance_root}/${suffix}"
     elif [[ -f "${fixture_root}/composer.json" ]]; then
-        package_name="$(package_destination "${fixture_root}/composer.json")"
+        package_name="$(package_destination "${fixture_root}/composer.json")" || return 1
         destination="${instance_root}/vendor/${package_name}/${suffix}"
     else
         echo "No destination mapping for fixture path: $fixture_path" >&2
@@ -110,6 +127,7 @@ destination_for_path() {
             ;;
     esac
 
+    reject_symlink_path "$destination" || return 1
     printf '%s\n' "$destination"
 }
 
@@ -122,7 +140,7 @@ sync_one() {
         echo "Fixture source file does not exist: $fixture_path" >&2
         return 1
     }
-    destination="$(destination_for_path "$fixture_path")"
+    destination="$(destination_for_path "$fixture_path")" || return 1
     mkdir -p "$(dirname "$destination")"
     cp --preserve=mode,timestamps "$source" "$destination"
     echo "Synced $fixture_path"
@@ -132,7 +150,7 @@ delete_one() {
     local fixture_path="$1"
     local destination
 
-    destination="$(destination_for_path "$fixture_path")"
+    destination="$(destination_for_path "$fixture_path")" || return 1
     [[ -f "$destination" || -L "$destination" ]] || {
         echo "Fixture destination file does not exist: $fixture_path" >&2
         return 1
@@ -143,6 +161,16 @@ delete_one() {
 
 read -r -a sync_paths <<< "${SYNC_PATHS:-}"
 read -r -a delete_paths <<< "${DELETE_PATHS:-}"
+
+# Check the other write/delete targets before changing any fixture files.
+for path in \
+    "${instance_root}/generated/code" \
+    "${instance_root}/generated/metadata" \
+    "${instance_root}/var/cache" \
+    "${instance_root}/var/page_cache" \
+    "${instance_root}/vendor.patch"; do
+    reject_symlink_path "$path"
+done
 
 for fixture_path in "${sync_paths[@]}"; do
     sync_one "$fixture_path"

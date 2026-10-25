@@ -1,0 +1,10 @@
+type Query {
+    defaultValue(value: String = "null"): String
+    directiveValue: String @cache(cacheIdentity: "null")
+    nestedValues(value: ReviewInput = {items: ["null"]}): String
+    unchanged(value: String = null): String @cache(cacheIdentity: null)
+}
+
+input ReviewInput {
+    items: [String]
+}

@@ -16,6 +16,9 @@ class SystemConfigDefinitions
     /** @var array{original: array<string, string>, new: array<string, string>}|null */
     private $definitions;
 
+    /** @var array<string, array<string, string|null>> */
+    private $moduleRoots = [];
+
     public function __construct(string $directory, string $newFilePath, string $originalFilePath)
     {
         $this->directory = $directory;
@@ -393,8 +396,11 @@ class SystemConfigDefinitions
      */
     private function findMagentoModuleRoot(string $moduleName, string $sideRoot)
     {
+        if (array_key_exists($moduleName, $this->moduleRoots[$sideRoot] ?? [])) {
+            return $this->moduleRoots[$sideRoot][$moduleName];
+        }
         if (!is_dir($sideRoot)) {
-            return null;
+            return $this->moduleRoots[$sideRoot][$moduleName] = null;
         }
 
         $iterator = new \RecursiveIteratorIterator(
@@ -406,10 +412,10 @@ class SystemConfigDefinitions
             }
             $moduleRoot = dirname($file->getPath());
             if ($this->getMagentoModuleName($moduleRoot) === $moduleName) {
-                return $moduleRoot;
+                return $this->moduleRoots[$sideRoot][$moduleName] = $moduleRoot;
             }
         }
-        return null;
+        return $this->moduleRoots[$sideRoot][$moduleName] = null;
     }
 
     /**
