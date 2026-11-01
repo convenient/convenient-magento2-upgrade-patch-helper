@@ -14,11 +14,18 @@
         }
     ],
     "require-dev": {
-        "magento/framework": "*",
+        "magento/framework": "~103.0.6",
         "phpstan/phpstan": "^1.9",
         "magento/module-theme": "*"
     },
+    "replace": {
+        "laminas/laminas-file": "2.11.0",
+        "laminas/laminas-oauth": "2.4.0"
+    },
     "config": {
+        "platform": {
+            "php": "8.1.0"
+        },
         "allow-plugins": {
             "magento/composer-dependency-version-audit-plugin": false
         }
